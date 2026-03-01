@@ -422,7 +422,7 @@ onMounted(() => {
 	// #endif
 	
 	// 设置浏览器标题
-	document.title = '网易云音乐'
+	// document.title = '网易云音乐'
 	// 初始化数据
 	initData()
 })
