@@ -1,44 +1,46 @@
 <template>
   <view class="discover-page">
-    <!-- 侧边栏 -->
-    <Sidebar :show="showSidebar" @close="closeSidebar"/>
+    <!-- 状态栏占位块 -->
+    <view class="status_bar" />
 
-    <!-- 自定义顶部导航栏 -->
+    <!-- 侧边栏 -->
+    <Sidebar :show="showSidebar" @close="closeSidebar" />
+
+    <!-- 顶部导航栏（固定顶部） -->
     <view class="custom-navbar">
-      <!-- 左侧菜单按钮 -->
       <view class="nav-left" @click="openSidebar">
         <i class="iconfont icon-caidanliebiao nav-icon" />
       </view>
-      
-      <!-- 中间搜索框 -->
       <view class="nav-search">
-        <up-search 
-          height="60"
-          placeholder="搜索歌曲、歌手、专辑" 
-          shape="round" 
-          v-model="searchKey"
-          :showAction="false"
-          :disabled="true"
-          @click="handleSearchClick"
+        <up-search
+            height="60"
+            placeholder="搜索歌曲、歌手、专辑"
+            shape="round"
+            v-model="searchKey"
+            :showAction="false"
+            :disabled="true"
+            @click="handleSearchClick"
         />
       </view>
-      
-      <!-- 右侧麦克风按钮 -->
       <view class="nav-right" @click="() => {}">
         <i class="iconfont icon-maikefeng nav-icon" />
       </view>
     </view>
 
-    <!-- 内容滚动区域 -->
-    <scroll-view scroll-y class="content-scroll" :style="{ height: scrollHeight }" :scroll-top="scrollTop"
-                 @scroll="onScroll">
-
-      <!-- 功能入口 -->
+    <!-- 中间滚动区域（自动撑满） -->
+    <scroll-view scroll-y class="content-scroll" @scroll="onScroll">
+      <!-- 快捷入口 -->
       <view class="quick-entry">
-        <view class="entry-item" v-for="(item, index) in quickEntries" :key="index">
+        <view
+            class="entry-item"
+            v-for="(item, index) in quickEntries"
+            :key="index"
+        >
           <view class="entry-icon" :style="{ background: item.bgColor }">
-            <text class="entry-date" v-if="item.showDate">{{ currentDay }}</text>
-            <i v-else class="iconfont entry-iconfont" :class="'icon-' + item.icon"/>
+            <text class="entry-date" v-if="item.showDate">
+              {{ currentDay }}
+            </text>
+            <i v-else class="iconfont entry-iconfont" :class="'icon-' + item.icon" />
           </view>
           <text class="entry-name">{{ item.name }}</text>
         </view>
@@ -48,7 +50,12 @@
       <view class="banner-wrapper">
         <swiper class="banner-swiper" indicator-dots circular autoplay :interval="4000">
           <swiper-item v-for="(item, index) in banners" :key="index">
-            <image class="banner-img" :src="item.imageUrl" mode="aspectFill" @click="handleBannerClick(item)"></image>
+            <image
+                class="banner-img"
+                :src="item.imageUrl"
+                mode="aspectFill"
+                @click="handleBannerClick(item)"
+            />
           </swiper-item>
         </swiper>
       </view>
@@ -59,16 +66,20 @@
           <text class="section-title">推荐歌单</text>
           <view class="section-more">
             <text class="more-text">更多</text>
-            <i class="iconfont icon-arrow-right more-arrow"/>
+            <i class="iconfont icon-arrow-right more-arrow" />
           </view>
         </view>
         <view class="playlist-grid">
-          <view class="playlist-item" v-for="(item, index) in playlists" :key="item.id"
-                @click="goPlaylistDetail(item.id)">
+          <view
+              class="playlist-item"
+              v-for="(item, index) in playlists"
+              :key="item.id"
+              @click="goPlaylistDetail(item.id)"
+          >
             <view class="playlist-cover">
-              <image class="cover-img" :src="item.picUrl" mode="aspectFill"></image>
+              <image class="cover-img" :src="item.picUrl" mode="aspectFill" />
               <view class="play-count">
-                <i class="iconfont icon-bofang2 play-count-icon"/>
+                <i class="iconfont icon-bofang2 play-count-icon" />
                 <text class="count-num">{{ formatPlayCount(item.playCount) }}</text>
               </view>
             </view>
@@ -83,20 +94,29 @@
           <text class="section-title">为你精选</text>
           <view class="section-more">
             <text class="more-text">播放全部</text>
-            <i class="iconfont icon-arrow-right more-arrow"/>
+            <i class="iconfont icon-arrow-right more-arrow" />
           </view>
         </view>
         <view class="personal-list">
-          <view class="personal-item" v-for="(item, index) in recommendSongs" :key="item.id" @click="playSong(item)">
+          <view
+              class="personal-item"
+              v-for="(item, index) in recommendSongs"
+              :key="item.id"
+              @click="playSong(item)"
+          >
             <view class="song-cover">
-              <image class="cover-img" :src="item.picUrl || item.album?.picUrl" mode="aspectFill"></image>
+              <image
+                  class="cover-img"
+                  :src="item.picUrl || item.album?.picUrl"
+                  mode="aspectFill"
+              />
             </view>
             <view class="song-info">
               <text class="song-name">{{ item.name }}</text>
               <text class="song-artist">{{ getArtistNames(item.song?.artists || item.artists) }}</text>
             </view>
             <view class="song-action">
-              <i class="iconfont icon-bofang1 song-play-icon"/>
+              <i class="iconfont icon-bofang1 song-play-icon" />
             </view>
           </view>
         </view>
@@ -108,15 +128,24 @@
           <text class="section-title">新歌速递</text>
           <view class="section-more">
             <text class="more-text">更多</text>
-            <i class="iconfont icon-arrow-right more-arrow"/>
+            <i class="iconfont icon-arrow-right more-arrow" />
           </view>
         </view>
         <scroll-view scroll-x class="new-song-scroll">
-          <view class="new-song-card" v-for="(item, index) in newSongs" :key="item.id" @click="playSong(item)">
+          <view
+              class="new-song-card"
+              v-for="(item, index) in newSongs"
+              :key="item.id"
+              @click="playSong(item)"
+          >
             <view class="card-cover">
-              <image class="cover-img" :src="item.album?.picUrl || item.picUrl" mode="aspectFill"></image>
+              <image
+                  class="cover-img"
+                  :src="item.album?.picUrl || item.picUrl"
+                  mode="aspectFill"
+              />
               <view class="play-icon">
-                <i class="iconfont icon-bofang1 card-play-icon"/>
+                <i class="iconfont icon-bofang1 card-play-icon" />
               </view>
             </view>
             <view class="card-info">
@@ -133,34 +162,38 @@
           <text class="section-title">热门话题</text>
         </view>
         <view class="topic-list">
-          <view class="topic-item" v-for="(item, index) in hotTopics" :key="index">
-            <view class="topic-rank" :class="{ 'rank-top': index < 3 }">{{ index + 1 }}</view>
+          <view
+              class="topic-item"
+              v-for="(item, index) in hotTopics"
+              :key="index"
+          >
+            <view class="topic-rank" :class="{ 'rank-top': index < 3 }">
+              {{ index + 1 }}
+            </view>
             <view class="topic-content">
               <text class="topic-title">#{{ item.title }}</text>
               <text class="topic-heat">{{ formatHotValue(item.participantCount) }}讨论</text>
             </view>
             <view class="topic-arrow">
-              <i class="iconfont icon-arrow-right topic-arrow-icon"/>
+              <i class="iconfont icon-arrow-right topic-arrow-icon" />
             </view>
           </view>
         </view>
       </view>
-
-
     </scroll-view>
 
-    <!-- 播放控制条 -->
-    <PlayBar />
-    
-    <!--底部导航栏-->
-    <AppTabBar :current-page="'discovery'" @tabChange="onTabChange"/>
+    <!-- 底部播放控制条（普通块） -->
+    <PlayBar class="play-bar" />
+
+    <!-- 底部导航栏（普通块） -->
+    <AppTabBar class="app-tabbar" :current-page="'discovery'" @tabChange="onTabChange" />
   </view>
 </template>
 
 <script setup>
-import {ref, computed, onMounted, onUnmounted} from 'vue'
-import {getBanner, getPersonalized, getRecommendNewSong, getNewSongs, getHotTopic} from '@/utils/api.js'
-import {useMusicStore} from '@/utils/musicStore.js'
+import { ref, computed, onMounted } from 'vue'
+import { getBanner, getPersonalized, getRecommendNewSong, getNewSongs, getHotTopic } from '@/utils/api.js'
+import { useMusicStore } from '@/utils/musicStore.js'
 import AppTabBar from '@/components/AppTabBar/AppTabBar.vue'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import PlayBar from '@/components/PlayBar/PlayBar.vue'
@@ -171,26 +204,9 @@ const activeTab = ref(0)
 const showSidebar = ref(false)
 const loading = ref(false)
 
-// 滚动控制
-const scrollTop = ref(0)
-let lastScrollTop = 0
-
-// 处理滚动事件，防止滚动溢出
+// 滚动控制（如有需要可保留）
 const onScroll = (e) => {
-  const currentScrollTop = e.detail.scrollTop
-  
-  // 记录最后一次滚动位置
-  lastScrollTop = currentScrollTop
-  
-  // 防止滚动溢出
-  const maxScrollTop = e.target.scrollHeight - e.target.clientHeight
-  if (currentScrollTop <= 0) {
-    // 滚动到顶部时，锁定在顶部
-    scrollTop.value = 0
-  } else if (currentScrollTop >= maxScrollTop) {
-    // 滚动到底部时，锁定在底部
-    scrollTop.value = maxScrollTop
-  }
+  // 您的滚动逻辑，例如导航栏透明渐变等
 }
 
 // 获取当前日期
@@ -198,22 +214,20 @@ const currentDay = computed(() => new Date().getDate())
 
 // 快捷入口
 const quickEntries = ref([
-  {name: '每日推荐', icon: 'calendar', bgColor: 'linear-gradient(135deg, #EC4141, #FF6666)', showDate: true},
-  {name: '私人fm', icon: 'FM', bgColor: 'linear-gradient(135deg, #5AC8FA, #007AFF)'},
-  {name: '歌单', icon: 'gedan', bgColor: 'linear-gradient(135deg, #FFCC00, #FF9500)'},
-  {name: '排行榜', icon: 'paihangbang', bgColor: 'linear-gradient(135deg, #34C759, #30D158)'},
-  {name: '直播', icon: 'zhibo', bgColor: 'linear-gradient(135deg, #FF2D55, #FF6B8A)'},
+  { name: '每日推荐', icon: 'calendar', bgColor: 'linear-gradient(135deg, #EC4141, #FF6666)', showDate: true },
+  { name: '私人fm', icon: 'FM', bgColor: 'linear-gradient(135deg, #5AC8FA, #007AFF)' },
+  { name: '歌单', icon: 'gedan', bgColor: 'linear-gradient(135deg, #FFCC00, #FF9500)' },
+  { name: '排行榜', icon: 'paihangbang', bgColor: 'linear-gradient(135deg, #34C759, #30D158)' },
+  { name: '直播', icon: 'zhibo', bgColor: 'linear-gradient(135deg, #FF2D55, #FF6B8A)' },
 ])
 
 // 搜索相关
 const searchKey = ref('')
 
-// 搜索点击处理
 const handleSearchClick = () => {
-	// 跳转到搜索页面或显示搜索界面
-	uni.navigateTo({
-		url: '/pages/search/search'
-	})
+  uni.navigateTo({
+    url: '/pages/search/search'
+  })
 }
 
 // 轮播图数据
@@ -231,44 +245,6 @@ const newSongs = ref([])
 // 热门话题
 const hotTopics = ref([])
 
-// 滚动区域高度
-const scrollHeight = ref('') // 动态计算高度
-
-// 动态计算滚动区域高度
-const calculateScrollHeight = () => {
-	const systemInfo = uni.getSystemInfoSync()
-	const windowHeight = systemInfo.windowHeight
-	const statusBarHeight = systemInfo.statusBarHeight || 0
-	const navbarHeight = 60 // 增大的导航栏高度
-	const tabbarHeight = 50 // 底部导航栏高度
-	const playbarHeight = 80 // 播放控制条高度
-	const bottomSafeArea = systemInfo.safeAreaInsets?.bottom || 0 // 底部安全区域
-	
-	// 计算可用高度：窗口高度 - 状态栏 - 增大的导航栏 - 底部导航栏 - 播放控制条 - 底部安全区域
-	const availableHeight = windowHeight - statusBarHeight - navbarHeight - tabbarHeight - playbarHeight - bottomSafeArea
-	scrollHeight.value = availableHeight + 'px'
-	
-	// 调试信息
-	// console.log('Discovery页面高度计算:', {
-	// 	windowHeight,
-	// 	statusBarHeight,
-	// 	navbarHeight,
-	// 	tabbarHeight,
-	// 	bottomSafeArea,
-	// 	availableHeight,
-	// 	finalHeight: scrollHeight.value
-	// })
-}
-
-// 监听屏幕旋转和尺寸变化
-let resizeTimer = null
-const handleResize = () => {
-	if (resizeTimer) clearTimeout(resizeTimer)
-	resizeTimer = setTimeout(() => {
-		calculateScrollHeight()
-	}, 100)
-}
-
 // 打开侧边栏
 const openSidebar = () => {
   showSidebar.value = true
@@ -281,7 +257,7 @@ const closeSidebar = () => {
 
 // tab切换
 const onTabChange = (name) => {
-	// 可以在这里添加业务逻辑
+  // 可以在这里添加业务逻辑
 }
 
 // 格式化播放数
@@ -327,9 +303,7 @@ const goPlaylistDetail = (id) => {
 // 播放歌曲
 const playSong = (song) => {
   if (song && song.id) {
-    // 通过全局状态播放歌曲
     musicStore.playSongById(song.id)
-    // 跳转到播放页面
     uni.navigateTo({
       url: `/pages/player/player?id=${song.id}`
     })
@@ -413,110 +387,107 @@ const initData = async () => {
 }
 
 onMounted(() => {
-	// 初始化高度计算
-	calculateScrollHeight()
-	
-	// 监听屏幕尺寸变化（如旋转屏幕）
-	// #ifdef H5
-	window.addEventListener('resize', handleResize)
-	// #endif
-	
-	// 设置浏览器标题
-	// document.title = '网易云音乐'
-	// 初始化数据
-	initData()
-})
-
-onUnmounted(() => {
-	// 清理事件监听器
-	// #ifdef H5
-	window.removeEventListener('resize', handleResize)
-	// #endif
+  initData()
 })
 </script>
 
 <style lang="scss" scoped>
 .discover-page {
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;                /* 占满整个视口高度 */
   background: #f5f5f5;
-  position: relative;
-  overflow: hidden;
 }
 
-// 自定义顶部导航栏
+.status_bar {
+  height: var(--status-bar-height);
+  width: 100%;
+}
+
+// 自定义顶部导航栏（固定顶部）
 .custom-navbar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	height: 60px; // 增大导航栏高度
-	padding: 0 24rpx;
-	background: #fff;
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	z-index: 100;
-	border-bottom: 1rpx solid #f0f0f0;
-	
-	.nav-left, .nav-right {
-		width: 60rpx;
-		height: 60rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-		border-radius: 50%;
-		transition: background-color 0.2s;
-		
-		&:active {
-			background-color: #f0f0f0;
-		}
-		
-		.nav-icon {
-			font-size: 44rpx;
-			color: #333;
-		}
-	}
-	
-	// 中间的搜索框
-	.nav-search {
-		flex: 1;
-		margin: 0 20rpx;
-		
-		::v-deep .u-search {
-			height: 60rpx; // 增加搜索框高度
-			
-			.u-search__content {
-				height: 60rpx; // 增加搜索框内容高度
-				border-radius: 25rpx; // 相应调整圆角
-				
-				.u-search__content__icon {
-					font-size: 30rpx; // 增加图标大小
-				}
-				
-				.u-search__content__input {
-					font-size: 24rpx; // 增加文字大小
-				}
-			}
-		}
-	}
+  flex-shrink: 0;               /* 防止被压缩 */
+  height: 60px;                 /* 固定高度 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
+
+  .nav-left,
+  .nav-right {
+    width: 60rpx;
+    height: 60rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+
+    &:active {
+      background-color: #f0f0f0;
+    }
+
+    .nav-icon {
+      font-size: 44rpx;
+      color: #333;
+    }
+  }
+
+  .nav-search {
+    flex: 1;
+    margin: 0 20rpx;
+
+    ::v-deep .u-search {
+      height: 60rpx;
+
+      .u-search__content {
+        height: 60rpx;
+        border-radius: 25rpx;
+
+        .u-search__content__icon {
+          font-size: 30rpx;
+        }
+
+        .u-search__content__input {
+          font-size: 24rpx;
+        }
+      }
+    }
+  }
 }
 
-// 内容滚动区
+// 中间滚动区域（自动撑满）
 .content-scroll {
-	background: #f5f5f5;
-	// 高度由JavaScript动态计算
-	margin-top: 50px; // 为导航栏留出空间
-	padding-top: 20rpx; // 适当的内容间距
+  flex: 1;                      /* 占据剩余所有高度 */
+  overflow-y: scroll;
+  background: #f5f5f5;
 }
 
-// 快捷入口
+// 底部播放控制条
+.play-bar {
+  flex-shrink: 0;
+  height: 120rpx;
+  margin: 0;
+}
+
+// 底部导航栏
+.app-tabbar {
+  flex-shrink: 0;
+  height: 100rpx;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #fff;
+  box-sizing: content-box;
+}
+
+/* 以下样式全部保持原样，无需任何修改 */
 .quick-entry {
   display: flex;
   justify-content: space-between;
   padding: 30rpx 24rpx;
   background: #fff;
-  // 移除margin-top，使用滚动区域的padding-top来控制间距
 
   .entry-item {
     display: flex;
@@ -551,7 +522,6 @@ onUnmounted(() => {
   }
 }
 
-// 轮播图
 .banner-wrapper {
   padding: 20rpx 24rpx;
   background: #fff;
@@ -569,7 +539,6 @@ onUnmounted(() => {
   }
 }
 
-// 通用section
 .section {
   background: #fff;
   margin-top: 20rpx;
@@ -605,7 +574,6 @@ onUnmounted(() => {
   }
 }
 
-// 歌单网格
 .playlist-grid {
   display: flex;
   flex-wrap: wrap;
@@ -668,7 +636,6 @@ onUnmounted(() => {
   }
 }
 
-// 个性推荐列表
 .personal-list {
   .personal-item {
     display: flex;
@@ -713,13 +680,12 @@ onUnmounted(() => {
     .song-action {
       .song-play-icon {
         font-size: 64rpx;
-        color: #EC4141;
+        color: #ec4141;
       }
     }
   }
 }
 
-// 新歌横向滚动
 .new-song-scroll {
   white-space: nowrap;
 
@@ -772,7 +738,6 @@ onUnmounted(() => {
   }
 }
 
-// 热门话题
 .topic-list {
   .topic-item {
     display: flex;
@@ -797,7 +762,7 @@ onUnmounted(() => {
       font-weight: bold;
 
       &.rank-top {
-        background: #EC4141;
+        background: #ec4141;
         color: #fff;
       }
     }
@@ -828,8 +793,4 @@ onUnmounted(() => {
     }
   }
 }
-
-// 底部占位（已移除）
-
-
 </style>

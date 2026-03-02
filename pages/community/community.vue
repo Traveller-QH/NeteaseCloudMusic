@@ -1,5 +1,8 @@
 <template>
 	<view class="community-page">
+    <!-- 状态栏占位块 -->
+    <view class="status_bar" />
+
 		<!-- 侧边栏 -->
 		<Sidebar :show="showSidebar" @close="closeSidebar" />
 		
@@ -24,7 +27,7 @@
 		</view>
 		
 		<!-- 内容区域 -->
-		<scroll-view scroll-y class="content-scroll" :style="{ height: scrollHeight }" :scroll-top="scrollTop" @scroll="onScroll" @scrolltolower="loadMore">
+    <scroll-view scroll-y class="content-scroll" @scroll="onScroll" @scrolltolower="loadMore">
 			<!-- 热门话题入口 -->
 			<view class="topic-entry" v-if="currentTab === 'recommend'">
 				<scroll-view scroll-x class="topic-scroll">
@@ -111,17 +114,17 @@
 			
 			
 		</scroll-view>
-		
-		<!-- 发布按钮 -->
-		<view class="publish-btn">
-			<i class="iconfont icon-bianji publish-icon" />
-		</view>
+
+    <!-- 发布按钮（fixed 保留，因为它悬浮在内容之上） -->
+    <view class="publish-btn">
+      <i class="iconfont icon-bianji publish-icon" />
+    </view>
 		
 		<!-- 播放控制条 -->
-		<PlayBar />
+    <PlayBar class="play-bar" />
 		
 		<!-- 底部导航栏 -->
-		<AppTabBar :current-page="'community'" @tabChange="onTabChange" />
+    <AppTabBar class="app-tabbar" :current-page="'community'" @tabChange="onTabChange" />
 	</view>
 </template>
 
@@ -416,86 +419,57 @@ const onTabChange = (name) => {
 </script>
 
 <style lang="scss" scoped>
-
-
 .community-page {
-	min-height: 100vh;
-	background: #f5f5f5;
-  position: relative;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f5f5f5;
 }
 
-// 合并的顶部导航栏
+.status_bar {
+  height: var(--status-bar-height);
+  width: 100%;
+}
+
 .combined-navbar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	height: 60px; // 调整为与discovery页面一致的高度
-	padding: 0 24rpx;
-	background: #fff;
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	z-index: 100;
-	border-bottom: 1rpx solid #f0f0f0;
-	
-	.nav-left, .nav-right {
-		width: 60rpx; // 调整为与discovery页面一致的按钮大小
-		height: 60rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-		border-radius: 50%; // 圆形背景
-		transition: background-color 0.2s; // 点击反馈
-		
-		&:active {
-			background-color: #f0f0f0; // 点击时的背景色
-		}
-		
-		.nav-icon {
-			font-size: 44rpx; // 调整为与discovery页面一致的图标大小
-			color: #333;
-		}
-	}
-	
-	// 中间的标签页
-	.nav-tabs {
-		display: flex;
-		gap: 40rpx; // 调整标签间距
-		
-		.tab-item {
-			font-size: 28rpx; // 调整字体大小
-			color: #666;
-			position: relative;
-			padding-bottom: 12rpx;
-			
-			&.active {
-				color: #333;
-				font-weight: bold;
-				font-size: 32rpx;
-				
-				&::after {
-					content: '';
-					position: absolute;
-					bottom: 0;
-					left: 50%;
-					transform: translateX(-50%);
-					width: 32rpx;
-					height: 4rpx;
-					background: #EC4141;
-					border-radius: 2rpx;
-				}
-			}
-		}
-	}
+  flex-shrink: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
+  /* 删除 position: fixed 相关 */
 }
 
 // 内容滚动
 .content-scroll {
-	// 高度由JavaScript动态计算
-	margin-top: 50px; // 调整为与导航栏高度一致
+  flex: 1;
+  overflow-y: scroll;
+  /* 删除 margin-top */
+}
+
+.play-bar {
+  flex-shrink: 0;
+  height: 120rpx;
+  margin: 0;
+  padding: 0;
+}
+
+.app-tabbar {
+  flex-shrink: 0;
+  height: 100rpx;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #fff;
+  box-sizing: content-box;
+}
+
+.publish-btn {
+  position: fixed;
+  right: 30rpx;
+  bottom: calc(120rpx + 100rpx + env(safe-area-inset-bottom)); /* 调整位置避免遮挡 */
+  /* 或保持原样，根据需求 */
 }
 
 // 话题入口

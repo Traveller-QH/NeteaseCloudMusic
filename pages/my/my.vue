@@ -1,5 +1,8 @@
 <template>
 	<view class="my-page">
+    <!-- 状态栏占位块 -->
+    <view class="status_bar" />
+
 		<!-- 侧边栏 -->
 		<Sidebar :show="showSidebar" @close="closeSidebar" />
 		
@@ -7,7 +10,7 @@
 		<view class="custom-navbar">
 			<!-- 左侧菜单按钮 -->
 			<view class="nav-left" @click="openSidebar">
-				<i class="iconfont icon-caidanliebiao nav-icon"></i>
+				<i class="iconfont icon-caidanliebiao nav-icon" />
 			</view>
 			
 			<!-- 中间标题 -->
@@ -15,12 +18,12 @@
 			
 			<!-- 右侧扫码按钮 -->
 			<view class="nav-right" @click="() => {}">
-				<i class="iconfont icon-saoma nav-icon"></i>
+				<i class="iconfont icon-saoma nav-icon" />
 			</view>
 		</view>
 		
 		<!-- 内容滚动区 -->
-		<scroll-view scroll-y class="content-scroll" :style="{ height: scrollHeight }" :scroll-top="scrollTop" @scroll="onScroll">
+    <scroll-view scroll-y class="content-scroll" @scroll="onScroll">
 			<!-- 顶部用户区域 -->
 			<view class="user-section">
 				<view class="user-bg"></view>
@@ -191,10 +194,10 @@
 		</scroll-view>
 		
 		<!-- 播放控制条 -->
-		<PlayBar />
+    <PlayBar class="play-bar" />
 		
 		<!-- 底部导航栏 -->
-		<AppTabBar :current-page="'my'" @tabChange="onTabChange" />
+    <AppTabBar class="app-tabbar" :current-page="'my'" @tabChange="onTabChange" />
 	</view>
 </template>
 
@@ -208,49 +211,17 @@ import PlayBar from '@/components/PlayBar/PlayBar.vue'
 
 const userStore = useUserStore()
 
-const activeTab = ref(2)  // 我的页面是第3个（索引为2）
 const showSidebar = ref(false)
 const showCreated = ref(false)
 const showCollected = ref(false)
 
 // 滚动控制
 const scrollTop = ref(0)
-let lastScrollTop = 0
-
-// 滚动区域高度
-const scrollHeight = ref('') // 动态计算高度
-
-// 动态计算滚动区域高度
-const calculateScrollHeight = () => {
-	const systemInfo = uni.getSystemInfoSync()
-	const windowHeight = systemInfo.windowHeight
-	const statusBarHeight = systemInfo.statusBarHeight || 0
-	const navbarHeight = 60 // 与discovery页面一致的导航栏高度
-	const tabbarHeight = 50 // 底部导航栏高度
-	const playbarHeight = 80 // 播放控制条高度
-	const bottomSafeArea = systemInfo.safeAreaInsets?.bottom || 0 // 底部安全区域
-	
-	// 计算可用高度：窗口高度 - 状态栏 - 导航栏 - 底部导航栏 - 播放控制条 - 底部安全区域
-	const availableHeight = windowHeight - statusBarHeight - navbarHeight - tabbarHeight - playbarHeight - bottomSafeArea
-	scrollHeight.value = availableHeight + 'px'
-}
-
-// 监听屏幕旋转和尺寸变化
-let resizeTimer = null
-const handleResize = () => {
-	if (resizeTimer) clearTimeout(resizeTimer)
-	resizeTimer = setTimeout(() => {
-		calculateScrollHeight()
-	}, 100)
-}
 
 // 处理滚动事件，防止滚动溢出
 const onScroll = (e) => {
 	const currentScrollTop = e.detail.scrollTop
-	
-	// 记录最后一次滚动位置
-	lastScrollTop = currentScrollTop
-	
+
 	// 防止滚动溢出
 	const maxScrollTop = e.target.scrollHeight - e.target.clientHeight
 	if (currentScrollTop <= 0) {
@@ -415,26 +386,15 @@ const initData = async () => {
 }
 
 // 使用 onShow 而不是 onMounted，确保每次进入页面都会刷新数据
-onShow(() => {
-	initData()
-})
+// onShow(() => {
+// 	initData()
+// })
 
 onMounted(() => {
-	// 初始化高度计算
-	calculateScrollHeight()
-	
-	// 监听屏幕尺寸变化（如旋转屏幕）
-	// #ifdef H5
-	window.addEventListener('resize', handleResize)
-	// #endif
+  initData()
 })
 
-onUnmounted(() => {
-	// 清理事件监听器
-	// #ifdef H5
-	window.removeEventListener('resize', handleResize)
-	// #endif
-})
+onUnmounted(() => {})
 
 // tab切换
 const onTabChange = (name) => {
@@ -446,52 +406,26 @@ const onTabChange = (name) => {
 
 <style lang="scss" scoped>
 .my-page {
-	min-height: 100vh;
-	background: #f5f5f5;
-  position: relative;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f5f5f5;
 }
 
-// 自定义顶部导航栏
+.status_bar {
+  height: var(--status-bar-height);
+  width: 100%;
+}
+
 .custom-navbar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	height: 60px; // 与discovery页面一致的导航栏高度
-	padding: 0 24rpx;
-	background: #fff;
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	z-index: 100;
-	border-bottom: 1rpx solid #f0f0f0;
-
-	.nav-left, .nav-right {
-		width: 60rpx;
-		height: 60rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-		border-radius: 50%;
-		transition: background-color 0.2s;
-		
-		&:active {
-			background-color: #f0f0f0;
-		}
-		
-		.nav-icon {
-			font-size: 44rpx; // 与discovery页面一致的图标大小
-			color: #333;
-		}
-	}
-
-	.nav-title {
-		font-size: 36rpx; // 与discovery页面一致的标题大小
-		font-weight: bold;
-		color: #333;
-	}
+  flex-shrink: 0;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
 }
 
 // 顶部操作栏
@@ -528,10 +462,24 @@ const onTabChange = (name) => {
 
 // 内容滚动区
 .content-scroll {
-	// 高度由JavaScript动态计算
-  background: #f5f5f5;
-	margin-top: 50px; // 与discovery页面一致
-  padding-top: 20rpx; // 适当的内容间距
+  flex: 1;
+  overflow-y: scroll;
+  /* 删除 margin-top 和动态高度 */
+}
+
+.play-bar {
+  flex-shrink: 0;
+  height: 120rpx;
+  margin: 0;
+  padding: 0;
+}
+
+.app-tabbar {
+  flex-shrink: 0;
+  height: 100rpx;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #fff;
+  box-sizing: content-box;
 }
 
 // 用户区域

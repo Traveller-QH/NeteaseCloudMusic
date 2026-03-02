@@ -1,5 +1,8 @@
 <template>
 	<view class="roam-page">
+    <!-- 状态栏占位块 -->
+    <view class="status_bar" />
+
 		<!-- 侧边栏 -->
 		<Sidebar :show="showSidebar" @close="closeSidebar" />
 		
@@ -7,7 +10,7 @@
 		<view class="custom-navbar">
 			<!-- 左侧菜单按钮 -->
 			<view class="nav-left" @click="openSidebar">
-				<i class="iconfont icon-caidanliebiao nav-icon"></i>
+				<i class="iconfont icon-caidanliebiao nav-icon" />
 			</view>
 			
 			<!-- 中间标题 -->
@@ -15,19 +18,19 @@
 			
 			<!-- 右侧时钟按钮 -->
 			<view class="nav-right" @click="() => {}">
-				<i class="iconfont icon-shijian nav-icon"></i>
+				<i class="iconfont icon-shijian nav-icon" />
 			</view>
 		</view>
 		
 		<!-- 主内容区 -->
-		<scroll-view scroll-y class="roam-content" :style="{ height: scrollHeight }" :scroll-top="scrollTop" @scroll="onScroll">
+		<scroll-view scroll-y class="roam-content" @scroll="onScroll">
 			<!-- 当前播放 -->
 			<view class="now-playing">
 				<view class="playing-bg"></view>
 				<view class="playing-content">
 					<view class="playing-cover">
 						<view class="cover-inner rotating">
-							<i class="iconfont icon-yinle cover-music-icon"></i>
+							<i class="iconfont icon-yinle cover-music-icon" />
 						</view>
 						<view class="cover-ring"></view>
 					</view>
@@ -37,7 +40,7 @@
 					</view>
 					<view class="playing-action">
 						<view class="action-btn">
-							<i class="iconfont icon-bofang2 action-play-icon"></i>
+							<i class="iconfont icon-bofang2 action-play-icon" />
 						</view>
 					</view>
 				</view>
@@ -51,7 +54,7 @@
 				<view class="mode-grid">
 					<view class="mode-item" v-for="(mode, index) in roamModes" :key="index">
 						<view class="mode-icon" :style="{ background: mode.bgColor }">
-							<i class="iconfont mode-iconfont" :class="'icon-' + mode.icon"></i>
+							<i class="iconfont mode-iconfont" :class="'icon-' + mode.icon" />
 						</view>
 						<view class="mode-info">
 							<text class="mode-name">{{ mode.name }}</text>
@@ -66,7 +69,7 @@
 				<view class="section-header">
 					<text class="section-title">猜你喜欢</text>
 					<view class="section-refresh" @click="refreshGuess">
-						<i class="iconfont icon-shuaxin refresh-icon"></i>
+						<i class="iconfont icon-shuaxin2 refresh-icon" />
 						<text class="refresh-text">换一批</text>
 					</view>
 				</view>
@@ -80,7 +83,7 @@
 							<text class="guess-artist">{{ getArtistNames(item.song?.artists || item.artists) }}</text>
 						</view>
 						<view class="guess-action">
-							<i class="iconfont icon-bofang1 guess-play-icon"></i>
+							<i class="iconfont icon-bofang1 guess-play-icon" />
 						</view>
 					</view>
 				</view>
@@ -109,7 +112,7 @@
 				<view class="scene-grid">
 					<view class="scene-item" v-for="(scene, index) in scenes" :key="index">
 						<view class="scene-card" :style="{ background: scene.bgColor }">
-							<i class="iconfont scene-iconfont" :class="'icon-' + scene.icon"></i>
+							<i class="iconfont scene-iconfont" :class="'icon-' + scene.icon" />
 							<text class="scene-name">{{ scene.name }}</text>
 						</view>
 					</view>
@@ -120,62 +123,31 @@
 		</scroll-view>
 		
 		<!-- 播放控制条 -->
-		<PlayBar />
+		<PlayBar class="play-bar" />
 		
 		<!-- 底部导航栏 -->
-		<AppTabBar :current-page="'roam'" @tabChange="onTabChange" />
+    <AppTabBar class="app-tabbar" :current-page="'roam'" @tabChange="onTabChange" />
 	</view>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { getPersonalFm, getRecommendNewSong, getPersonalized } from '@/utils/api.js'
+import { useMusicStore } from '@/utils/musicStore.js'
 import AppTabBar from '@/components/AppTabBar/AppTabBar.vue'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import PlayBar from '@/components/PlayBar/PlayBar.vue'
 
-const showSidebar = ref(false)
+const musicStore = useMusicStore()
 
-// 添加当前页面索引，漫游页面是第2个（索引为1）
-const activeTab = ref(1)
+const showSidebar = ref(false)
 
 // 滚动控制
 const scrollTop = ref(0)
-let lastScrollTop = 0
-
-// 滚动区域高度
-const scrollHeight = ref('') // 动态计算高度
-
-// 动态计算滚动区域高度
-const calculateScrollHeight = () => {
-	const systemInfo = uni.getSystemInfoSync()
-	const windowHeight = systemInfo.windowHeight
-	const statusBarHeight = systemInfo.statusBarHeight || 0
-	const navbarHeight = 60 // 与discovery页面一致的导航栏高度
-	const tabbarHeight = 50 // 底部导航栏高度
-	const playbarHeight = 80 // 播放控制条高度
-	const bottomSafeArea = systemInfo.safeAreaInsets?.bottom || 0 // 底部安全区域
-	
-	// 计算可用高度：窗口高度 - 状态栏 - 导航栏 - 底部导航栏 - 播放控制条 - 底部安全区域
-	const availableHeight = windowHeight - statusBarHeight - navbarHeight - tabbarHeight - playbarHeight - bottomSafeArea
-	scrollHeight.value = availableHeight + 'px'
-}
-
-// 监听屏幕旋转和尺寸变化
-let resizeTimer = null
-const handleResize = () => {
-	if (resizeTimer) clearTimeout(resizeTimer)
-	resizeTimer = setTimeout(() => {
-		calculateScrollHeight()
-	}, 100)
-}
 
 // 处理滚动事件，防止滚动溢出
 const onScroll = (e) => {
 	const currentScrollTop = e.detail.scrollTop
-	
-	// 记录最后一次滚动位置
-	lastScrollTop = currentScrollTop
 	
 	// 防止滚动溢出
 	const maxScrollTop = e.target.scrollHeight - e.target.clientHeight
@@ -237,8 +209,12 @@ const getArtistNames = (artists) => {
 
 // 播放歌曲
 const playSong = (song) => {
-	console.log('Play song:', song)
-	// 实现播放逻辑
+  if (song && song.id) {
+    musicStore.playSongById(song.id)
+    uni.navigateTo({
+      url: `/pages/player/player?id=${song.id}`
+    })
+  }
 }
 
 // 获取私人fm
@@ -253,7 +229,7 @@ const fetchPersonalFm = async () => {
 	}
 }
 
-// 获取推荐歌曲（猶你喜欢）
+// 获取推荐歌曲（猜你喜欢）
 const fetchGuessSongs = async () => {
 	try {
 		const res = await getRecommendNewSong(10)
@@ -279,23 +255,10 @@ const initData = async () => {
 }
 
 onMounted(() => {
-	// 初始化高度计算
-	calculateScrollHeight()
-	
-	// 监听屏幕尺寸变化（如旋转屏幕）
-	// #ifdef H5
-	window.addEventListener('resize', handleResize)
-	// #endif
-	
 	initData()
 })
 
-onUnmounted(() => {
-	// 清理事件监听器
-	// #ifdef H5
-	window.removeEventListener('resize', handleResize)
-	// #endif
-})
+onUnmounted(() => {})
 
 // tab切换
 const onTabChange = (name) => {
@@ -307,59 +270,50 @@ const onTabChange = (name) => {
 
 <style lang="scss" scoped>
 .roam-page {
-	min-height: 100vh;
-	background: #f5f5f5;
-  position: relative;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f5f5f5;
+}
+
+.status_bar {
+  height: var(--status-bar-height);
+  width: 100%;
 }
 
 // 自定义顶部导航栏
 .custom-navbar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	height: 60px; // 与discovery页面一致的导航栏高度
-	padding: 0 24rpx;
-	background: #fff;
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	z-index: 100;
-	border-bottom: 1rpx solid #f0f0f0;
-
-	.nav-left, .nav-right {
-		width: 60rpx;
-		height: 60rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-		border-radius: 50%;
-		transition: background-color 0.2s;
-		
-		&:active {
-			background-color: #f0f0f0;
-		}
-		
-		.nav-icon {
-			font-size: 44rpx; // 与discovery页面一致的图标大小
-			color: #333;
-		}
-	}
-
-	.nav-title {
-		font-size: 36rpx; // 与discovery页面一致的标题大小
-		font-weight: bold;
-		color: #333;
-	}
+  flex-shrink: 0;
+  height: 60px;                    /* 保持原有高度 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
+  /* 删除 position: fixed 相关属性 */
 }
-
 
 // 主内容区
 .roam-content {
-	// 高度由JavaScript动态计算
-	margin-top: 60px; // 与discovery页面一致
+  flex: 1;
+  overflow-y: scroll;
+  /* 删除 margin-top 和动态高度 */
+}
+
+.play-bar {
+  flex-shrink: 0;
+  height: 120rpx;                  /* 与组件内部一致 */
+  margin: 0;
+  padding: 0;
+}
+
+.app-tabbar {
+  flex-shrink: 0;
+  height: 100rpx;                  /* 自定义导航高度 */
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #fff;
+  box-sizing: content-box;
 }
 
 // 当前播放
