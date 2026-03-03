@@ -166,10 +166,20 @@ export const useUserStore = defineStore('user', {
           uni.setStorageSync('bindings', JSON.stringify(bindings))
         }
         
-        // 保存cookie
+        // 保存 cookie
         if (cookie) {
-          this.cookie = cookie
-          uni.setStorageSync('cookie', cookie)
+          // 提取 MUSIC_U 部分
+          let cookieValue = cookie
+          if (cookie.includes('MUSIC_U=')) {
+            const match = cookie.match(/MUSIC_U=[^;]+/)
+            if (match) {
+              cookieValue = match[0]
+            }
+          }
+                  
+          this.cookie = cookieValue
+          uni.setStorageSync('cookie', cookieValue)
+          console.log('[UserStore] Cookie 已保存:', cookieValue.substring(0, 50) + '...')
         }
         
         // 设置登录状态
@@ -325,19 +335,16 @@ export const useUserStore = defineStore('user', {
     
     /**
      * 验证登录状态是否有效
+     * 说明：为了提升用户体验，采用永久登录策略
+     * 只有在接口调用明确返回登录失效时才会清除登录状态
      */
     async validateLoginStatus() {
       try {
-        console.log('[UserStore] 验证登录状态有效性')
-        
-        // 检查登录时间是否过期（7天）
-        const now = Date.now()
-        const oneWeek = 7 * 24 * 60 * 60 * 1000
-        if (now - this.loginTimestamp > oneWeek) {
-          console.log('[UserStore] 登录已过期（超过7天）')
-          return false
-        }
-        
+        console.log('[UserStore] 验证登录状态有效性（永久登录模式）')
+            
+        // 不再检查登录时间，采用永久登录策略
+        // 只有当 API 请求明确返回登录失效时才会触发重新登录
+            
         // 调用接口验证登录状态
         const res = await getLoginStatus()
         if (res.data?.code === 200 && res.data?.profile?.userId) {
@@ -351,7 +358,9 @@ export const useUserStore = defineStore('user', {
         }
       } catch (error) {
         console.error('[UserStore] 验证登录状态失败:', error)
-        return false
+        // 网络错误等情况不直接判定为登录失效
+        // 可以在后续 API 请求中继续尝试验证
+        return true
       }
     },
     
