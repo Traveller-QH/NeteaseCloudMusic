@@ -1,11 +1,13 @@
 <template>
   <view class="search-result-page">
+    <!-- 状态栏占位块 -->
+    <view class="status_bar" />
     <!-- 顶部导航栏 -->
     <view class="search-navbar">
       <view class="nav-left" @click="goBack">
         <i class="iconfont icon-arrow-left nav-icon" />
       </view>
-      
+
       <view class="nav-center">
         <view class="search-input-container" @click="goToSearchPage">
           <i class="iconfont icon-sousuo search-icon" />
@@ -18,14 +20,14 @@
         </view>
       </view>
     </view>
-    
+
     <!-- 分类标签 -->
     <view class="category-tabs">
       <scroll-view scroll-x class="tabs-scroll" show-scrollbar="false">
         <view class="tabs-container">
-          <view 
-            class="tab-item" 
-            v-for="tab in tabs" 
+          <view
+            class="tab-item"
+            v-for="tab in tabs"
             :key="tab.type"
             :class="{ 'active': activeTab === tab.type }"
             @click="switchTab(tab.type)"
@@ -35,16 +37,16 @@
         </view>
       </scroll-view>
     </view>
-    
+
     <!-- 错误提示 -->
     <view v-if="apiError" class="error-message" @click="retryLoad">
       <text class="error-text">连接服务器超时，点击重试</text>
     </view>
-    
+
     <!-- 搜索结果内容 -->
-    <scroll-view 
-      class="result-content" 
-      scroll-y 
+    <scroll-view
+      class="result-content"
+      scroll-y
       :style="{ height: contentHeight + 'px' }"
       @scrolltolower="loadMore"
       v-else
@@ -69,9 +71,9 @@
             <text class="section-title">单曲</text>
           </view>
           <view class="song-list" v-if="allResults.songs && allResults.songs.length > 0">
-            <view 
-              class="song-item" 
-              v-for="(song, index) in allResults.songs.slice(0, 8)" 
+            <view
+              class="song-item"
+              v-for="(song, index) in allResults.songs.slice(0, 8)"
               :key="index"
               @click="playSong(song)"
             >
@@ -83,10 +85,10 @@
                 <i class="iconfont icon-bofang1 play-icon" />
               </view>
             </view>
-            
+
             <!-- 查看全部按钮 -->
-            <view 
-              class="view-all-btn" 
+            <view
+              class="view-all-btn"
               v-if="allResults.songMoreText"
               @click="switchTab('single')"
             >
@@ -94,16 +96,16 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 歌单 -->
         <view class="result-section">
           <view class="section-header" v-if="allResults.playlists && allResults.playlists.length > 0">
             <text class="section-title">歌单</text>
           </view>
           <view class="playlist-list" v-if="allResults.playlists && allResults.playlists.length > 0">
-            <view 
-              class="playlist-item" 
-              v-for="(playlist, index) in allResults.playlists.slice(0, 5)" 
+            <view
+              class="playlist-item"
+              v-for="(playlist, index) in allResults.playlists.slice(0, 5)"
               :key="index"
               @click="goToPlaylist(playlist)"
             >
@@ -113,10 +115,10 @@
                 <text class="playlist-creator">by {{ playlist.creator?.nickname || playlist.creatorName || '未知' }}</text>
               </view>
             </view>
-            
+
             <!-- 查看全部按钮 -->
-            <view 
-              class="view-all-btn" 
+            <view
+              class="view-all-btn"
               v-if="allResults.playlistMoreText"
               @click="switchTab('playlist')"
             >
@@ -124,7 +126,7 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 声音 -->
         <!-- 注释：综合分类下声音数据需要单独请求接口 -->
         <!-- <view class="result-section">
@@ -132,9 +134,9 @@
             <text class="section-title">声音</text>
           </view>
           <view class="voice-list" v-if="allResults.voices && allResults.voices.length > 0">
-            <view 
-              class="voice-item" 
-              v-for="(voice, index) in allResults.voices.slice(0, 3)" 
+            <view
+              class="voice-item"
+              v-for="(voice, index) in allResults.voices.slice(0, 3)"
               :key="index"
               @click="playVoice(voice)"
             >
@@ -144,9 +146,9 @@
                 <text class="voice-creator">by {{ formatVoiceData(voice).creator }}</text>
               </view>
             </view>
-            
-            <view 
-              class="view-all-btn" 
+
+            <view
+              class="view-all-btn"
               v-if="allResults.voiceMoreText"
               @click="switchTab('voice')"
             >
@@ -154,16 +156,16 @@
             </view>
           </view>
         </view> -->
-        
+
         <!-- 声音（特殊处理：单独请求数据）-->
         <view class="result-section">
           <view class="section-header" v-if="voiceResults.length > 0">
             <text class="section-title">声音</text>
           </view>
           <view class="voice-list" v-if="voiceResults.length > 0">
-            <view 
-              class="voice-item" 
-              v-for="(voice, index) in voiceResults.slice(0, 3)" 
+            <view
+              class="voice-item"
+              v-for="(voice, index) in voiceResults.slice(0, 3)"
               :key="index"
               @click="playVoice(voice)"
             >
@@ -173,9 +175,9 @@
                 <text class="voice-creator">by {{ formatVoiceData(voice).creator }}</text>
               </view>
             </view>
-            
-            <view 
-              class="view-all-btn" 
+
+            <view
+              class="view-all-btn"
               v-if="voiceResults.length > 3"
               @click="switchTab('voice')"
             >
@@ -183,16 +185,16 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 专辑 -->
         <view class="result-section">
           <view class="section-header" v-if="allResults.albums && allResults.albums.length > 0">
             <text class="section-title">专辑</text>
           </view>
           <view class="album-list" v-if="allResults.albums && allResults.albums.length > 0">
-            <view 
-              class="album-item" 
-              v-for="(album, index) in allResults.albums.slice(0, 3)" 
+            <view
+              class="album-item"
+              v-for="(album, index) in allResults.albums.slice(0, 3)"
               :key="index"
               @click="goToAlbum(album)"
             >
@@ -202,10 +204,10 @@
                 <text class="album-artist">{{ formatArtists(album.artists || [album.artist]) }}</text>
               </view>
             </view>
-            
+
             <!-- 查看全部按钮 -->
-            <view 
-              class="view-all-btn" 
+            <view
+              class="view-all-btn"
               v-if="allResults.albumMoreText"
               @click="switchTab('album')"
             >
@@ -213,7 +215,7 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 播客(电台) -->
         <!-- 注释：综合分类下播客数据需要单独请求接口 -->
         <!-- <view class="result-section">
@@ -221,9 +223,9 @@
             <text class="section-title">播客</text>
           </view>
           <view class="radio-list" v-if="allResults.radios && allResults.radios.length > 0">
-            <view 
-              class="radio-item" 
-              v-for="(radio, index) in allResults.radios.slice(0, 5)" 
+            <view
+              class="radio-item"
+              v-for="(radio, index) in allResults.radios.slice(0, 5)"
               :key="index"
               @click="goToRadio(radio)"
             >
@@ -233,9 +235,9 @@
                 <text class="radio-creator">{{ radio.dj?.nickname || radio.creatorName || '未知主播' }}</text>
               </view>
             </view>
-            
-            <view 
-              class="view-all-btn" 
+
+            <view
+              class="view-all-btn"
               v-if="allResults.radioMoreText"
               @click="switchTab('radio')"
             >
@@ -243,16 +245,16 @@
             </view>
           </view>
         </view> -->
-        
+
         <!-- 播客(电台)（特殊处理：单独请求数据）-->
         <!--<view class="result-section">
           <view class="section-header" v-if="radioResults.length > 0">
             <text class="section-title">播客</text>
           </view>
           <view class="radio-list" v-if="radioResults.length > 0">
-            <view 
-              class="radio-item" 
-              v-for="(radio, index) in radioResults.slice(0, 5)" 
+            <view
+              class="radio-item"
+              v-for="(radio, index) in radioResults.slice(0, 5)"
               :key="index"
               @click="goToRadio(radio)"
             >
@@ -262,9 +264,9 @@
                 <text class="radio-creator">{{ radio.dj?.nickname || radio.creatorName || '未知主播' }}</text>
               </view>
             </view>
-            
-            <view 
-              class="view-all-btn" 
+
+            <view
+              class="view-all-btn"
               v-if="radioResults.length > 5"
               @click="switchTab('radio')"
             >
@@ -272,7 +274,7 @@
             </view>
           </view>
         </view>-->
-        
+
         <!-- 视频(MV) -->
         <!-- 注释：综合分类下视频数据需要单独请求接口 -->
         <!-- <view class="result-section">
@@ -280,9 +282,9 @@
             <text class="section-title">视频</text>
           </view>
           <view class="video-list" v-if="allResults.videos && allResults.videos.length > 0">
-            <view 
-              class="video-item" 
-              v-for="(video, index) in allResults.videos.slice(0, 5)" 
+            <view
+              class="video-item"
+              v-for="(video, index) in allResults.videos.slice(0, 5)"
               :key="index"
               @click="playVideo(video)"
             >
@@ -295,9 +297,9 @@
                 <text class="video-artist">{{ formatArtists(video.artists || video.creator) }}</text>
               </view>
             </view>
-            
-            <view 
-              class="view-all-btn" 
+
+            <view
+              class="view-all-btn"
               v-if="allResults.videoMoreText"
               @click="switchTab('video')"
             >
@@ -305,16 +307,16 @@
             </view>
           </view>
         </view> -->
-        
+
         <!-- 视频(MV)（特殊处理：单独请求数据）-->
         <view class="result-section">
           <view class="section-header" v-if="videoResults.length > 0">
             <text class="section-title">视频</text>
           </view>
           <view class="video-list" v-if="videoResults.length > 0">
-            <view 
-              class="video-item" 
-              v-for="(video, index) in videoResults.slice(0, 5)" 
+            <view
+              class="video-item"
+              v-for="(video, index) in videoResults.slice(0, 5)"
               :key="index"
               @click="playVideo(video)"
             >
@@ -327,9 +329,9 @@
                 <text class="video-artist">{{ formatArtists(video.artists || video.creator) }}</text>
               </view>
             </view>
-            
-            <view 
-              class="view-all-btn" 
+
+            <view
+              class="view-all-btn"
               v-if="videoResults.length > 5"
               @click="switchTab('video')"
             >
@@ -337,16 +339,16 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 歌手 -->
         <view class="result-section">
           <view class="section-header" v-if="allResults.artists && allResults.artists.length > 0">
             <text class="section-title">歌手</text>
           </view>
           <view class="artist-list" v-if="allResults.artists && allResults.artists.length > 0">
-            <view 
-              class="artist-item" 
-              v-for="(artist, index) in allResults.artists.slice(0, 3)" 
+            <view
+              class="artist-item"
+              v-for="(artist, index) in allResults.artists.slice(0, 3)"
               :key="index"
               @click="goToArtist(artist)"
             >
@@ -355,10 +357,10 @@
                 <text class="artist-name">{{ artist.name }}</text>
               </view>
             </view>
-            
+
             <!-- 查看全部按钮 -->
-            <view 
-              class="view-all-btn" 
+            <view
+              class="view-all-btn"
               v-if="allResults.artistMoreText"
               @click="switchTab('artist')"
             >
@@ -366,16 +368,16 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 用户 -->
         <view class="result-section">
           <view class="section-header" v-if="allResults.users && allResults.users.length > 0">
             <text class="section-title">用户</text>
           </view>
           <view class="user-list" v-if="allResults.users && allResults.users.length > 0">
-            <view 
-              class="user-item" 
-              v-for="(user, index) in allResults.users.slice(0, 1)" 
+            <view
+              class="user-item"
+              v-for="(user, index) in allResults.users.slice(0, 1)"
               :key="index"
               @click="goToUser(user)"
             >
@@ -384,10 +386,10 @@
                 <text class="user-name">{{ user.nickname || user.userName }}</text>
               </view>
             </view>
-            
+
             <!-- 查看全部按钮 -->
-            <view 
-              class="view-all-btn" 
+            <view
+              class="view-all-btn"
               v-if="allResults.userMoreText"
               @click="switchTab('user')"
             >
@@ -396,7 +398,7 @@
           </view>
         </view>
       </view>
-      
+
       <!-- 单独分类显示对应类型的结果 -->
       <view v-else>
         <!-- 单曲 -->
@@ -405,8 +407,8 @@
             <text class="section-title">单曲</text>
           </view>
           <view class="song-list">
-            <view 
-              class="song-item" 
+            <view
+              class="song-item"
               v-for="(song, index) in singleResults"
               :key="index"
               @click="playSong(song)"
@@ -421,15 +423,15 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 歌单 -->
         <view class="result-section" v-if="activeTab === 'playlist'">
           <view class="section-header" v-if="playlistResults.length > 0">
             <text class="section-title">歌单</text>
           </view>
           <view class="playlist-list">
-            <view 
-              class="playlist-item" 
+            <view
+              class="playlist-item"
               v-for="(playlist, index) in playlistResults"
               :key="index"
               @click="goToPlaylist(playlist)"
@@ -442,15 +444,15 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 声音 -->
         <view class="result-section" v-if="activeTab === 'voice'">
           <view class="section-header" v-if="voiceResults.length > 0">
             <text class="section-title">声音</text>
           </view>
           <view class="voice-list">
-            <view 
-              class="voice-item" 
+            <view
+              class="voice-item"
               v-for="(voice, index) in voiceResults"
               :key="index"
               @click="playVoice(voice)"
@@ -463,15 +465,15 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 专辑 -->
         <view class="result-section" v-if="activeTab === 'album'">
           <view class="section-header" v-if="albumResults.length > 0">
             <text class="section-title">专辑</text>
           </view>
           <view class="album-list">
-            <view 
-              class="album-item" 
+            <view
+              class="album-item"
               v-for="(album, index) in albumResults"
               :key="index"
               @click="goToAlbum(album)"
@@ -484,15 +486,15 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 播客(电台) -->
         <view class="result-section" v-if="activeTab === 'radio'">
           <view class="section-header" v-if="radioResults.length > 0">
             <text class="section-title">播客</text>
           </view>
           <view class="radio-list">
-            <view 
-              class="radio-item" 
+            <view
+              class="radio-item"
               v-for="(radio, index) in radioResults"
               :key="index"
               @click="goToRadio(radio)"
@@ -505,15 +507,15 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 视频(MV) -->
         <view class="result-section" v-if="activeTab === 'video'">
           <view class="section-header" v-if="videoResults.length > 0">
             <text class="section-title">视频</text>
           </view>
           <view class="video-list">
-            <view 
-              class="video-item" 
+            <view
+              class="video-item"
               v-for="(video, index) in videoResults"
               :key="index"
               @click="playVideo(video)"
@@ -529,15 +531,15 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 歌手 -->
         <view class="result-section" v-if="activeTab === 'artist'">
           <view class="section-header" v-if="artistResults.length > 0">
             <text class="section-title">歌手</text>
           </view>
           <view class="artist-list">
-            <view 
-              class="artist-item" 
+            <view
+              class="artist-item"
               v-for="(artist, index) in artistResults"
               :key="index"
               @click="goToArtist(artist)"
@@ -549,15 +551,15 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 用户 -->
         <view class="result-section" v-if="activeTab === 'user'">
           <view class="section-header" v-if="userResults.length > 0">
             <text class="section-title">用户</text>
           </view>
           <view class="user-list">
-            <view 
-              class="user-item" 
+            <view
+              class="user-item"
               v-for="(user, index) in userResults"
               :key="index"
               @click="goToUser(user)"
@@ -569,14 +571,14 @@
             </view>
           </view>
         </view>
-        
+
         <!-- 歌词 -->
         <view class="result-section" v-if="activeTab === 'lyrics'">
           <view class="section-header" v-if="lyricsResults.length > 0">
             <text class="section-title">歌词</text>
           </view>
           <view class="lyrics-list">
-            <view 
+            <view
               class="lyrics-item-wrapper"
               v-for="(lyric, index) in lyricsResults"
               :key="index"
@@ -592,10 +594,10 @@
                   <i class="iconfont icon-bofang1 play-icon" />
                 </view>
               </view>
-              
+
               <!-- 查看更多歌词按钮 -->
-              <view 
-                class="view-more-lyrics" 
+              <view
+                class="view-more-lyrics"
                 v-if="shouldShowMoreButton(lyric)"
                 @click.stop="toggleLyrics(lyric.id)"
               >
@@ -606,17 +608,23 @@
           </view>
         </view>
       </view>
-      
+
       <!-- 加载状态 -->
       <view class="loading" v-if="loading">
         <text class="loading-text">加载中...</text>
       </view>
-      
+
       <!-- 空状态 -->
       <view class="empty-state" v-if="!loading && isEmptyResult">
         <text class="empty-text">暂无搜索结果</text>
       </view>
     </scroll-view>
+
+    <!-- 底部播放控制条占位块（防止内容被遮挡） -->
+    <view class="play-bar-placeholder"></view>
+
+    <!-- 底部播放控制条（固定底部） -->
+    <PlayBar class="play-bar" />
   </view>
 </template>
 
@@ -625,6 +633,7 @@ import { ref, onMounted, computed } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import { search, getSearchDefault } from '@/utils/api.js'
 import { useMusicStore } from '@/utils/musicStore.js'
+import PlayBar from '@/components/PlayBar/PlayBar.vue'
 
 const musicStore = useMusicStore()
 
@@ -695,7 +704,7 @@ const isEmptyResult = computed(() => {
     if (!allResults.value || typeof allResults.value !== 'object') {
       return true
     }
-    return Object.keys(allResults.value).every(key => 
+    return Object.keys(allResults.value).every(key =>
       !allResults.value[key] || allResults.value[key].length === 0
     )
   } else {
@@ -758,11 +767,11 @@ const searchResultsData = async (type = 1018) => {
   loading.value = true
   try {
     const res = await search(currentKeyword.value, type, pageSize.value, (currentPage.value - 1) * pageSize.value)
-    
+
     if (res && res.code === 200) {
       // 根据返回的数据结构处理结果
       const result = res.result || res.data
-      
+
       if (type === 1018 || activeTab.value === 'all') { // 综合搜索
         allResults.value = {
           songs: result?.song?.songs || result?.songs || [],
@@ -782,7 +791,7 @@ const searchResultsData = async (type = 1018) => {
           voices: result?.resources?.filter(item => item.resourceType === 'voice') || result?.soundList || result?.voice?.soundList || [],
           voiceMoreText: result?.voice?.moreText || ''
         }
-        
+
         // 调试信息
         console.log('综合搜索结果:', {
           songs: allResults.value.songs.length,
@@ -794,7 +803,7 @@ const searchResultsData = async (type = 1018) => {
           radios: allResults.value.radios.length,
           voices: allResults.value.voices.length
         })
-        
+
         // 特殊处理：为视频、播客、声音分类单独请求数据（当在综合分类下时）
         if (activeTab.value === 'all') {
           // 请求视频数据（获取完整数据，但只渲染前5条）
@@ -810,7 +819,7 @@ const searchResultsData = async (type = 1018) => {
               console.error('视频数据加载失败:', error)
             })
           }
-          
+
           // 请求播客数据（获取完整数据，但只渲染前5条）
           if (searchTypeMap.radio) {
             search(currentKeyword.value, 1009, 100, 0).then(radioRes => {
@@ -824,7 +833,7 @@ const searchResultsData = async (type = 1018) => {
               console.error('播客数据加载失败:', error)
             })
           }
-          
+
           // 请求声音数据（获取完整数据，但只渲染前3条）
           if (searchTypeMap.voice) {
             search(currentKeyword.value, 2000, 100, 0).then(voiceRes => {
@@ -889,7 +898,7 @@ const searchResultsData = async (type = 1018) => {
 const switchTab = async (tabType) => {
   activeTab.value = tabType
   currentPage.value = 1
-  
+
   // 清空当前分类的数据（除了综合）
   if (tabType !== 'all') {
     if (tabType === 'single') singleResults.value = []
@@ -902,7 +911,7 @@ const switchTab = async (tabType) => {
     else if (tabType === 'voice') voiceResults.value = []
     else if (tabType === 'lyrics') lyricsResults.value = []
   }
-  
+
   let searchType = 1018 // 默认综合搜索
   if (tabType === 'all') {
     // 如果切换到综合，且还没有数据，则加载综合数据
@@ -914,7 +923,7 @@ const switchTab = async (tabType) => {
   } else if (tabType in searchTypeMap) {
     searchType = searchTypeMap[tabType]
   }
-  
+
   await searchResultsData(searchType)
 }
 
@@ -963,7 +972,7 @@ const getLyricsContent = (song) => {
   if (song?.lyrics) {
     return song.lyrics
   }
-  return 
+  return
 }
 
 // 切换歌词显示状态
@@ -1079,10 +1088,10 @@ const loadMore = () => {
     // 综合分类不支持滚动加载
     return
   }
-  
+
   // 这里可以实现分页加载更多
   currentPage.value++
-  
+
   // 根据当前标签类型加载更多数据
   if (activeTab.value in searchTypeMap) {
     const searchType = searchTypeMap[activeTab.value]
@@ -1103,7 +1112,7 @@ const calculateContentHeight = () => {
   const statusBarHeight = systemInfo.statusBarHeight || 0
   const navbarHeight = 50 // 导航栏高度
   const tabHeight = 40 // 标签栏高度
-  
+
   contentHeight.value = windowHeight - statusBarHeight - navbarHeight - tabHeight
 }
 
@@ -1123,6 +1132,12 @@ onMounted(() => {
   background-color: #f5f5f5;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.status_bar {
+  height: var(--status-bar-height);
+  width: 100%;
 }
 
 .debug-info {
@@ -1131,7 +1146,7 @@ onMounted(() => {
   border: 1px solid #ddd;
   margin: 10px;
   border-radius: 5px;
-  
+
   text {
     display: block;
     font-size: 12px;
@@ -1247,6 +1262,8 @@ onMounted(() => {
   flex: 1;
   padding: 15px;
   box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .result-section {
@@ -1367,7 +1384,7 @@ onMounted(() => {
           color: #999;
           margin-bottom: 3px;
         }
-        
+
         .voice-creator {
           display: block;
           font-size: 12px;
@@ -1517,7 +1534,7 @@ onMounted(() => {
         }
       }
     }
-    
+
     .view-all-btn {
       padding: 15px 0;
       text-align: center;
@@ -1605,34 +1622,34 @@ onMounted(() => {
 .lyrics-list {
   .lyrics-item-wrapper {
     border-bottom: 1px solid #f5f5f5;
-    
+
     &:last-child {
       border-bottom: none;
     }
   }
-  
+
   .lyrics-item {
     display: flex;
     align-items: center;
     padding: 12px 0;
-    
+
     .lyrics-info {
       flex: 1;
-      
+
       .lyrics-name {
         display: block;
         font-size: 16px;
         color: #333;
         margin-bottom: 4px;
       }
-      
+
       .lyrics-artist {
         display: block;
         font-size: 13px;
         color: #999;
         margin-bottom: 4px;
       }
-      
+
       .lyrics-content {
         display: block;
         font-size: 13px;
@@ -1640,36 +1657,36 @@ onMounted(() => {
         line-height: 1.4;
       }
     }
-    
+
     .lyrics-actions {
       margin-left: 10px;
-      
+
       .play-icon {
         font-size: 20px;
         color: #999;
       }
     }
   }
-  
+
   .view-all-btn {
     padding: 15px 0;
     text-align: center;
-    
+
     .view-all-text {
       font-size: 14px;
       color: #999;
     }
   }
-  
+
   .view-more-lyrics {
     padding: 15px 0;
     text-align: center;
-    
+
     .view-more-text {
       font-size: 14px;
       color: #999;
     }
-    
+
     .iconfont {
       font-size: 12px;
       color: #999;
@@ -1710,5 +1727,23 @@ onMounted(() => {
     color: #999;
     text-align: center;
   }
+}
+
+// 底部播放控制条占位块（防止内容被遮挡）
+.play-bar-placeholder {
+  flex-shrink: 0;
+  height: 120rpx;
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+// 底部播放控制条（固定定位）
+.play-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 </style>

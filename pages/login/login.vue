@@ -1,5 +1,8 @@
 <template>
 	<view class="login-page">
+    <!-- 状态栏占位块 -->
+    <view class="status_bar" />
+
 		<!-- 顶部导航栏 -->
 		<view class="nav-bar">
 			<view class="nav-back" @click="goBack">
@@ -408,6 +411,11 @@ onUnmounted(() => {
 	min-height: 100vh;
 	background: linear-gradient(180deg, #EC4141 0%, #FF6666 100%);
 	padding-top: var(--status-bar-height);
+}
+
+.status_bar {
+  height: var(--status-bar-height);
+  width: 100%;
 }
 
 .nav-bar {

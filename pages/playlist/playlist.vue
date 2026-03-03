@@ -1,5 +1,8 @@
 <template>
   <view class="playlist-page">
+    <!-- 状态栏占位块 -->
+    <view class="status_bar" />
+
     <!-- 顶部导航 -->
     <view class="nav-header">
       <view class="nav-left" @click="handleBack">
@@ -79,10 +82,11 @@
       </view>
 
       <!-- 底部安全区 -->
-      <view class="safe-bottom"></view>
+      <view class="safe-bottom" />
     </scroll-view>
 
-
+    <!-- 底部播放控制条（普通块） -->
+    <PlayBar />
   </view>
 </template>
 
@@ -318,12 +322,17 @@ onMounted(async () => {
   overflow: hidden;
 }
 
+.status_bar {
+  height: var(--status-bar-height);
+  width: 100%;
+}
+
 // 顶部导航
 .nav-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 60rpx 24rpx 20rpx;
+  padding: 24rpx 20rpx;
 
   .nav-left, .nav-right {
     width: 80rpx;

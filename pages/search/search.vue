@@ -1,5 +1,8 @@
 <template>
   <view class="search-page">
+    <!-- 状态栏占位块 -->
+    <view class="status_bar" />
+
     <!-- 顶部导航栏 -->
     <view class="search-navbar">
       <view class="nav-left" @click="goBack">
@@ -265,6 +268,11 @@ onShow(() => {
   background-color: #f5f5f5;
   display: flex;
   flex-direction: column;
+}
+
+.status_bar {
+  height: var(--status-bar-height);
+  width: 100%;
 }
 
 .search-navbar {

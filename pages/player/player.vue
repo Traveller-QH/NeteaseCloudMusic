@@ -1,5 +1,8 @@
 <template>
 	<view class="player-page">
+    <!-- 状态栏占位块 -->
+    <view class="status_bar" />
+
 		<!-- 背景模糊层 -->
 		<view class="bg-blur">
 			<view class="bg-image"></view>
@@ -344,8 +347,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-
-
 .player-page {
 	position: fixed;
 	top: 0;
@@ -354,6 +355,11 @@ onMounted(() => {
 	bottom: 0;
 	display: flex;
 	flex-direction: column;
+}
+
+.status_bar {
+  height: var(--status-bar-height);
+  width: 100%;
 }
 
 // 背景模糊层
@@ -374,7 +380,7 @@ onMounted(() => {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 60rpx 24rpx 20rpx;
+	padding: 24rpx 20rpx;
 	position: relative;
 	z-index: 10; // 顶部导航层级较高
 
