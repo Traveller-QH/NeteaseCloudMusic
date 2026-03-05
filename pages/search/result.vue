@@ -1039,7 +1039,7 @@ const goToPlaylist = (playlist) => {
 // 跳转到专辑详情
 const goToAlbum = (album) => {
   uni.navigateTo({
-    url: `/pages/playlist/playlist?id=${album.id}&type=album`
+    url: `/pages/album/album?id=${album.id}`
   })
 }
 
