@@ -8,7 +8,7 @@
 <br />
 
 [![Stars](https://img.shields.io/github/stars/Traveller-QH/NetEaseCloudMusic?style=flat)](https://github.com/Traveller-QH/NetEaseCloudMusic/stargazers)
-[![License](https://img.shields.io/github/license/Traveller-QH/NetEaseCloudMusic)](https://github.com/Traveller-QH/NetEaseCloudMusic/LICENSE)
+[![License](https://img.shields.io/github/license/Traveller-QH/NetEaseCloudMusic)](https://api.github.com/repos/Traveller-QH/NetEaseCloudMusic/license)
 [![Issues](https://img.shields.io/github/issues/Traveller-QH/NetEaseCloudMusic)](https://github.com/Traveller-QH/NetEaseCloudMusic/issues)
 
 </div>
