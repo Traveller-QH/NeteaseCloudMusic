@@ -618,10 +618,10 @@
       <view class="empty-state" v-if="!loading && isEmptyResult">
         <text class="empty-text">暂无搜索结果</text>
       </view>
-    </scroll-view>
 
-    <!-- 底部播放控制条占位块（防止内容被遮挡） -->
-    <view class="play-bar-placeholder"></view>
+      <!-- 底部播放控制条占位块（防止内容被遮挡） -->
+      <view v-if="!loading && !isEmptyResult" class="play-bar-placeholder"></view>
+    </scroll-view>
 
     <!-- 底部播放控制条（固定底部） -->
     <PlayBar class="play-bar" />
@@ -1731,10 +1731,7 @@ onMounted(() => {
 
 // 底部播放控制条占位块（防止内容被遮挡）
 .play-bar-placeholder {
-  flex-shrink: 0;
   height: 120rpx;
-  padding-bottom: constant(safe-area-inset-bottom);
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 // 底部播放控制条（固定定位）
