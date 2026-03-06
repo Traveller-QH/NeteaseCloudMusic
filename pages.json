@@ -83,6 +83,13 @@
         "navigationStyle": "custom",
         "navigationBarTitleText": "评论"
       }
+    },
+    {
+      "path": "pages/artist/artist",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "歌手"
+      }
     }
   ],
   "globalStyle": {

@@ -544,6 +544,81 @@ export const getMvWiki = (id) => {
 	return get('/ugc/mv/get', { id })
 }
 
+// ==================== 歌手相关接口 ====================
+
+/**
+ * 获取歌手详情
+ * @param {Number} id - 歌手 id
+ */
+export const getArtistDetail = (id) => {
+	return get('/artist/detail', { id })
+}
+
+/**
+ * 获取歌手描述
+ * @param {Number} id - 歌手 id
+ */
+export const getArtistDesc = (id) => {
+	return get('/artist/desc', { id })
+}
+
+/**
+ * 获取歌手全部歌曲
+ * @param {Number} id - 歌手 id
+ * @param {String} order - hot: 热门，time: 时间排序
+ * @param {Number} limit - 取出数量，默认 50
+ * @param {Number} offset - 偏移量，用于分页
+ */
+export const getArtistSongs = (id, order = 'hot', limit = 50, offset = 0) => {
+	return get('/artist/songs', { id, order, limit, offset })
+}
+
+/**
+ * 获取歌手专辑
+ * @param {Number} id - 歌手 id
+ * @param {Number} limit - 取出数量，默认 30
+ * @param {Number} offset - 偏移量，用于分页
+ */
+export const getArtistAlbum = (id, limit = 30, offset = 0) => {
+	return get('/artist/album', { id, limit, offset })
+}
+
+/**
+ * 获取歌手 MV
+ * @param {Number} id - 歌手 id
+ * @param {Number} limit - 取出数量，默认 30
+ * @param {Number} offset - 偏移量，用于分页
+ */
+export const getArtistMv = (id, limit = 30, offset = 0) => {
+	return get('/artist/mv', { id, limit, offset })
+}
+
+/**
+ * 获取歌手粉丝数量
+ * @param {Number} id - 歌手 id
+ * @param {Number} limit - 取出粉丝数量，默认 20
+ * @param {Number} offset - 偏移量，用于分页
+ */
+export const getArtistFollowCount = (id, limit = 20, offset = 0) => {
+	return get('/artist/follow/count', { id, limit, offset })
+}
+
+/**
+ * 获取歌手简要百科信息
+ * @param {Number} id - 歌手 id
+ */
+export const getUgcArtist = (id) => {
+	return get('/ugc/artist/get', { id })
+}
+
+/**
+ * 获取歌手详情动态
+ * @param {Number} id - 歌手 id
+ */
+export const getArtistDetailDynamic = (id) => {
+	return get('/artist/detail/dynamic', { id })
+}
+
 export default {
 	// 首页
 	getBanner,
@@ -610,13 +685,20 @@ export default {
 	getVideoDetailInfo,
 	toggleResourceLike,
 	getVideoComments,
-	postNewComment,
-	deleteComment,
 	getMvComments,
 	convertMlogToVideo,
 	getMlogUrl,
 	getMvUrl,
 	getMvDetail,
 	getMvDetailInfo,
-	getMvWiki
+	getMvWiki,
+	// 歌手
+	getArtistDetail,
+	getArtistDesc,
+	getArtistSongs,
+	getArtistAlbum,
+	getArtistMv,
+	getArtistFollowCount,
+	getUgcArtist,
+	getArtistDetailDynamic
 }

@@ -1046,7 +1046,7 @@ const goToAlbum = (album) => {
 // 跳转到歌手详情
 const goToArtist = (artist) => {
   uni.navigateTo({
-    url: `/pages/playlist/playlist?id=${artist.id}&type=artist`
+    url: `/pages/artist/artist?id=${artist.id}`
   })
 }
 
