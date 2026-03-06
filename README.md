@@ -3,7 +3,7 @@
 <h2> NetEaseCloudMusic </h2>
 <p> 一个基于 UniApp 的仿网易云音乐移动应用 </p>
 
-|[GitHub](https://github.com/Traveller-QH/NeteaseCloudMusic) | [API 文档](https://binaryify.github.io/NeteaseCloudMusicApi/#/) |
+|[GitHub](https://github.com/Traveller-QH/NeteaseCloudMusic) | [API 文档](https://neteasecloudmusicapienhanced.js.org/#/) |
 
 <br />
 
