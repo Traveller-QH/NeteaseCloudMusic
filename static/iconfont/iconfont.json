@@ -6,6 +6,34 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "243749",
+      "name": "三点菜单",
+      "font_class": "sandiancaidan",
+      "unicode": "e616",
+      "unicode_decimal": 58902
+    },
+    {
+      "icon_id": "35162597",
+      "name": "Ascending order升序",
+      "font_class": "a-Ascendingordershengxu",
+      "unicode": "e849",
+      "unicode_decimal": 59465
+    },
+    {
+      "icon_id": "35162756",
+      "name": "Descending order降序",
+      "font_class": "a-Descendingorderjiangxu",
+      "unicode": "e84d",
+      "unicode_decimal": 59469
+    },
+    {
+      "icon_id": "37730452",
+      "name": "排序方式",
+      "font_class": "paixufangshi",
+      "unicode": "e682",
+      "unicode_decimal": 59010
+    },
+    {
       "icon_id": "14478390",
       "name": "关  闭",
       "font_class": "guanbi",
