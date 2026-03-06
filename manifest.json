@@ -91,6 +91,14 @@
                         "spotlight@3x" : "unpackage/res/icons/120x120.png"
                     }
                 }
+            },
+            "splashscreen" : {
+                "androidStyle" : "default",
+                "android" : {
+                    "hdpi" : "static/splash/saber1.png",
+                    "xhdpi" : "static/splash/saber2.png",
+                    "xxhdpi" : "static/splash/saber3.png"
+                }
             }
         }
     },
