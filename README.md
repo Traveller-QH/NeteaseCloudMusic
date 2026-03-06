@@ -1,5 +1,5 @@
 <div align="center">
-<img alt="logo" height="100" width="100" src="static/logo.png" />
+<img alt="logo" height="100" width="100" src="static/favicon.ico" />
 <h2> NetEaseCloudMusic </h2>
 <p> 一个基于 UniApp 的仿网易云音乐移动应用 </p>
 
