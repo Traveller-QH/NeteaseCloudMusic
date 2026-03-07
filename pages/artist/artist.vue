@@ -1,4 +1,4 @@
-<template>
+  <template>
   <view class="artist-page">
     <!-- 状态栏占位块 -->
     <view class="status_bar" />
@@ -9,7 +9,7 @@
         <i class="iconfont icon-arrow-left nav-icon"/>
       </view>
       <view class="nav-right" @click="showMenu = true">
-        <i class="iconfont icon-gengduo nav-icon"/>
+        <i class="iconfont icon-sandiancaidan nav-icon"/>
       </view>
     </view>
 
@@ -107,7 +107,7 @@
         <view class="sort-navbar">
           <view class="sort-left">热门 50 首</view>
           <view class="sort-right" @click="showSongSortMenu = true">
-            <i class="iconfont icon-paixu sort-icon"/>
+            <i class="iconfont icon-paixufangshi sort-icon"/>
           </view>
         </view>
 
@@ -147,7 +147,7 @@
         <view class="sort-navbar">
           <view class="sort-left">按发行时间排序</view>
           <view class="sort-right" @click="showAlbumSortMenu = true">
-            <i class="iconfont icon-paixu sort-icon"/>
+            <i class="iconfont icon-paixufangshi sort-icon"/>
           </view>
         </view>
 
@@ -179,7 +179,7 @@
         <view class="sort-navbar">
           <view class="sort-left">MV</view>
           <view class="sort-right" @click="toggleVideoSort">
-            <i class="iconfont icon-paixu sort-icon"/>
+            <i class="iconfont icon-a-Descendingorderjiangxu sort-icon"/>
           </view>
         </view>
 
@@ -222,19 +222,19 @@
           <text class="menu-text">私信</text>
         </view>
         <view class="menu-item" @click="handleBlockArtist">
-          <i class="iconfont icon-jinyan menu-icon"/>
+          <i class="iconfont icon-pingbi menu-icon"/>
           <text class="menu-text">屏蔽音乐人歌曲</text>
         </view>
         <view class="menu-item" @click="handleBlacklist">
-          <i class="iconfont icon-heimingdan menu-icon"/>
+          <i class="iconfont icon-lahei menu-icon"/>
           <text class="menu-text">拉黑</text>
         </view>
         <view class="menu-item" @click="handleReport">
-          <i class="iconfont icon-jubao menu-icon"/>
+          <i class="iconfont icon-yichang_weixian_jubao menu-icon"/>
           <text class="menu-text">举报</text>
         </view>
         <view class="menu-item" @click="handleShare">
-          <i class="iconfont icon-fenxiang menu-icon"/>
+          <i class="iconfont icon-fenxiang1 menu-icon"/>
           <text class="menu-text">分享</text>
         </view>
       </view>
