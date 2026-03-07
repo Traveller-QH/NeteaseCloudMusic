@@ -1572,7 +1572,7 @@ onMounted(async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1000;
+  z-index: 9999;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -1597,6 +1597,7 @@ onMounted(async () => {
   flex-direction: column;
   overflow: hidden;
   animation: slideUp 0.3s ease-out;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.1);
 }
 
 @keyframes slideUp {
