@@ -84,7 +84,7 @@
         
         <!-- 回复按钮 -->
         <view class="reply-btn-wrapper" v-if="comment.showFloorComment && comment.showFloorComment.showReplyCount" @click="openFloorComment(comment)">
-          <text class="reply-btn-text">{{ comment.showFloorComment.replyCount || 0 }}条回复></text>
+          <text class="reply-btn-text">{{ comment.showFloorComment.replyCount || 0 }}条回复<i class="iconfont icon-arrow-right reply-btn-icon" /></text>
         </view>
       </view>
 
@@ -1240,6 +1240,10 @@ onMounted(async () => {
 .sort-btn .iconfont {
   font-size: 24rpx;
   color: #666;
+}
+
+.reply-btn-icon {
+  font-size: 24rpx;
 }
 
 /* 楼层评论列表 */
