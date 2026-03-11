@@ -330,6 +330,14 @@ export const getLyric = (id) => {
 	return get('/lyric', { id })
 }
 
+/**
+ * 获取歌曲红心数量
+ * @param {Number} id - 歌曲 id
+ */
+export const getSongRedCount = (id) => {
+	return get('/song/red/count', { id })
+}
+
 // ==================== 搜索相关接口 ====================
 
 /**
@@ -660,6 +668,7 @@ export default {
 	getSongDetail,
 	getSongUrl,
 	getLyric,
+	getSongRedCount,
 	// 搜索
 	search,
 	getSearchDefault,
