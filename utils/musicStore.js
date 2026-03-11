@@ -2,7 +2,7 @@
  * 全局音乐播放状态管理
  */
 import { reactive, ref, computed } from 'vue'
-import { getSongDetail, getSongUrl, getLyric, getSongComment } from './api.js'
+import { getSongDetail, getSongUrl, getLyric, getSongComment, getSongRedCount } from './api.js'
 
 // 当前播放请求ID，用于处理并发播放请求
 let currentPlayId = 0
@@ -205,7 +205,11 @@ const state = reactive({
 	// 当前歌词索引
 	currentLyricIndex: 0,
 	// 评论数量
-	commentCount: 0
+	commentCount: 0,
+	// 红心数量
+	redCount: 0,
+	// 红心数量描述（后端返回的格式化字符串）
+	redCountDesc: '0'
 })
 
 // 歌曲名称
@@ -248,19 +252,25 @@ const durationStr = computed(() => formatTime(state.duration))
 const commentCountStr = computed(() => {
 	const count = state.commentCount
 	if (!count) return '0'
-	if (count >= 1000000) {
-		return '100w+'
+	
+	// 小于 1000，显示实际数字
+	if (count < 1000) {
+		return count.toString()
 	}
-	if (count >= 100000) {
-		return '10w+'
+	
+	// 大于等于 1000，以万为单位向下取整
+	const wanCount = Math.floor(count / 10000)
+	if (wanCount >= 1) {
+		return `${wanCount}w+`
 	}
-	if (count >= 10000) {
-		return '1w+'
-	}
-	if (count >= 1000) {
-		return '1k'
-	}
-	return count.toString()
+	
+	// 1000-9999 之间，显示 999+
+	return '999+'
+})
+
+// 红心数量格式化（直接使用后端返回的 countDesc）
+const redCountStr = computed(() => {
+	return state.redCountDesc || '0'
 })
 
 // 初始化音频实例
@@ -279,6 +289,7 @@ const playSongById = async (id) => {
 	state.lyrics = []
 	state.currentLyricIndex = 0
 	state.commentCount = 0
+	state.redCount = 0
 	
 	try {
 		// 获取歌曲详情
@@ -299,6 +310,9 @@ const playSongById = async (id) => {
 		
 		// 获取评论数量
 		fetchCommentCount(id)
+		
+		// 获取红心数量
+		fetchRedCount(id)
 		
 		// 获取播放地址
 		const urlRes = await getSongUrl(id, 'standard')
@@ -348,7 +362,7 @@ const fetchLyric = async (id) => {
 // 获取评论数量
 const fetchCommentCount = async (id) => {
 	try {
-		// 只获取1条评论，主要是为了获取total字段
+		// 只获取 1 条评论，主要是为了获取 total 字段
 		const res = await getSongComment(id, 1, 0)
 		if (res.code === 200) {
 			state.commentCount = res.total || 0
@@ -356,6 +370,21 @@ const fetchCommentCount = async (id) => {
 	} catch (error) {
 		console.error('获取评论数量失败:', error)
 		state.commentCount = 0
+	}
+}
+
+// 获取红心数量
+const fetchRedCount = async (id) => {
+	try {
+		const res = await getSongRedCount(id)
+		if (res.code === 200 && res.data) {
+			state.redCount = res.data.count || 0
+			state.redCountDesc = res.data.countDesc || '0'
+		}
+	} catch (error) {
+		console.error('获取红心数量失败:', error)
+		state.redCount = 0
+		state.redCountDesc = '0'
 	}
 }
 
@@ -476,6 +505,7 @@ export const useMusicStore = () => {
 		currentTimeStr,
 		durationStr,
 		commentCountStr,
+		redCountStr,
 		playSongById,
 		togglePlay,
 		play,
@@ -495,6 +525,7 @@ export default {
 	currentTimeStr,
 	durationStr,
 	commentCountStr,
+	redCountStr,
 	playSongById,
 	togglePlay,
 	play,
