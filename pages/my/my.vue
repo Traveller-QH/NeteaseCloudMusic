@@ -325,7 +325,6 @@ const getArtistNames = (artists) => {
 
 // 播放歌曲
 const playSong = (song) => {
-	console.log('Play song:', song)
 	if (!song || !song.id) return
 	
 	uni.navigateTo({
@@ -354,7 +353,7 @@ const handleLogin = () => {
 
 // 初始化数据
 const initData = async () => {
-	console.log('我的页面 - 当前登录状态:', userStore.isLogin, 'userId:', userStore.userInfo.userId)
+	// console.log('我的页面 - 当前登录状态:', userStore.isLogin, 'userId:', userStore.userInfo.userId)
 	
 	// 确保即使未登录也有默认的空数组
 	userStore.createdPlaylists = []
@@ -363,7 +362,7 @@ const initData = async () => {
 	
 	// 如果已经登录且有userId，直接刷新数据，不需要重新检查登录状态
 	if (userStore.isLogin && userStore.userInfo.userId) {
-		console.log('已登录，刷新用户数据')
+		// console.log('已登录，刷新用户数据')
 		await userStore.refreshUserData()
 		return
 	}
@@ -371,9 +370,9 @@ const initData = async () => {
 	// 未登录时，检查本地存储的cookie是否有效
 	const cookie = uni.getStorageSync('cookie')
 	if (cookie) {
-		console.log('有本地cookie，检查登录状态')
+		// console.log('有本地cookie，检查登录状态')
 		const loggedIn = await userStore.validateLoginStatus()
-		console.log('登录状态:', loggedIn)
+		// console.log('登录状态:', loggedIn)
 		if (loggedIn) {
 			await Promise.all([
 				userStore.fetchUserPlaylists(),
@@ -381,7 +380,7 @@ const initData = async () => {
 			])
 		}
 	} else {
-		console.log('无本地cookie，未登录')
+		// console.log('无本地cookie，未登录')
 	}
 }
 
@@ -398,7 +397,7 @@ onUnmounted(() => {})
 
 // tab切换
 const onTabChange = (name) => {
-	console.log('Tab changed to:', name)
+	// console.log('Tab changed to:', name)
 }
 
 

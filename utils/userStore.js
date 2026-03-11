@@ -104,7 +104,7 @@ export const useUserStore = defineStore('user', {
      */
     async setLoginState(loginData) {
       try {
-        console.log('[UserStore] 设置登录状态，原始数据:', loginData)
+        // console.log('[UserStore] 设置登录状态，原始数据:', loginData)
         
         // 保存完整响应数据
         this.loginResponse = loginData
@@ -121,7 +121,7 @@ export const useUserStore = defineStore('user', {
           profile = loginData.profile
           // 扫码登录时，cookie在响应体中
           cookie = loginData.cookie || ''
-          console.log('[UserStore] 识别为扫码登录数据，profile:', profile, 'cookie:', cookie)
+          // console.log('[UserStore] 识别为扫码登录数据，profile:', profile, 'cookie:', cookie)
         }
         // 手机号登录/验证码登录的数据结构
         else if (loginData.code === 200 && loginData.profile) {
@@ -179,7 +179,7 @@ export const useUserStore = defineStore('user', {
                   
           this.cookie = cookieValue
           uni.setStorageSync('cookie', cookieValue)
-          console.log('[UserStore] Cookie 已保存:', cookieValue.substring(0, 50) + '...')
+          // console.log('[UserStore] Cookie 已保存:', cookieValue.substring(0, 50) + '...')
         }
         
         // 设置登录状态
@@ -190,7 +190,7 @@ export const useUserStore = defineStore('user', {
         // 持久化存储关键信息
         this.persistLoginState()
         
-        console.log('[UserStore] 登录状态设置成功')
+        /*console.log('[UserStore] 登录状态设置成功')
         console.log('[UserStore] 用户信息:', this.userInfo)
         console.log('[UserStore] 账户信息:', this.accountInfo)
         console.log('[UserStore] 包月版本:', this.accountInfo.baoyueVersion)
@@ -199,7 +199,7 @@ export const useUserStore = defineStore('user', {
           userId: this.userInfo.userId,
           baoyueVersion: this.accountInfo.baoyueVersion,
           nickname: this.userInfo.nickname
-        })
+        })*/
         
         return true
       } catch (error) {
@@ -233,7 +233,7 @@ export const useUserStore = defineStore('user', {
       
       // 持久化用户信息
       uni.setStorageSync('userInfo', JSON.stringify(this.userInfo))
-      console.log('[UserStore] 用户信息已更新:', this.userInfo)
+      // console.log('[UserStore] 用户信息已更新:', this.userInfo)
     },
     
     /**
@@ -260,7 +260,7 @@ export const useUserStore = defineStore('user', {
       
       // 持久化账户信息
       uni.setStorageSync('accountInfo', JSON.stringify(this.accountInfo))
-      console.log('[UserStore] 账户信息已更新，baoyueVersion:', this.accountInfo.baoyueVersion)
+      // console.log('[UserStore] 账户信息已更新，baoyueVersion:', this.accountInfo.baoyueVersion)
     },
     
     /**
@@ -272,7 +272,7 @@ export const useUserStore = defineStore('user', {
         uni.setStorageSync('loginTimestamp', this.loginTimestamp)
         uni.setStorageSync('loginMethod', this.loginMethod)
         
-        console.log('[UserStore] 登录状态已持久化')
+        // console.log('[UserStore] 登录状态已持久化')
       } catch (error) {
         console.error('[UserStore] 持久化登录状态失败:', error)
       }
@@ -283,7 +283,7 @@ export const useUserStore = defineStore('user', {
      */
     async restoreLoginState() {
       try {
-        console.log('[UserStore] 尝试从本地存储恢复登录状态')
+        // console.log('[UserStore] 尝试从本地存储恢复登录状态')
         
         // 恢复基本状态
         this.isLoggedIn = uni.getStorageSync('isLoggedIn') || false
@@ -300,7 +300,7 @@ export const useUserStore = defineStore('user', {
         const accountInfoStr = uni.getStorageSync('accountInfo')
         if (accountInfoStr) {
           this.accountInfo = JSON.parse(accountInfoStr)
-          console.log('[UserStore] 恢复账户信息，baoyueVersion:', this.accountInfo.baoyueVersion)
+          // console.log('[UserStore] 恢复账户信息，baoyueVersion:', this.accountInfo.baoyueVersion)
         }
         
         // 恢复token
@@ -324,7 +324,7 @@ export const useUserStore = defineStore('user', {
           }
         }
         
-        console.log('[UserStore] 登录状态恢复完成，当前状态:', this.isLogin)
+        // console.log('[UserStore] 登录状态恢复完成，当前状态:', this.isLogin)
         return this.isLogin
       } catch (error) {
         console.error('[UserStore] 恢复登录状态失败:', error)
@@ -340,7 +340,7 @@ export const useUserStore = defineStore('user', {
      */
     async validateLoginStatus() {
       try {
-        console.log('[UserStore] 验证登录状态有效性（永久登录模式）')
+        // console.log('[UserStore] 验证登录状态有效性（永久登录模式）')
             
         // 不再检查登录时间，采用永久登录策略
         // 只有当 API 请求明确返回登录失效时才会触发重新登录
@@ -350,10 +350,10 @@ export const useUserStore = defineStore('user', {
         if (res.data?.code === 200 && res.data?.profile?.userId) {
           // 更新用户信息
           await this.setLoginState(res)
-          console.log('[UserStore] 登录状态验证通过')
+          // console.log('[UserStore] 登录状态验证通过')
           return true
         } else {
-          console.log('[UserStore] 登录状态已失效')
+          // console.log('[UserStore] 登录状态已失效')
           return false
         }
       } catch (error) {
@@ -368,7 +368,7 @@ export const useUserStore = defineStore('user', {
      * 清除登录状态
      */
     clearLoginState() {
-      console.log('[UserStore] 清除登录状态')
+      // console.log('[UserStore] 清除登录状态')
       
       // 清除状态
       this.isLoggedIn = false
@@ -432,7 +432,7 @@ export const useUserStore = defineStore('user', {
         }
       })
       
-      console.log('[UserStore] 登录状态已清除')
+      // console.log('[UserStore] 登录状态已清除')
     },
     
     /**
@@ -440,7 +440,7 @@ export const useUserStore = defineStore('user', {
      */
     async logout() {
       try {
-        console.log('[UserStore] 用户退出登录')
+        // console.log('[UserStore] 用户退出登录')
         
         // 清除登录状态
         this.clearLoginState()
@@ -470,7 +470,7 @@ export const useUserStore = defineStore('user', {
      */
     async loginByPassword(phone, password, countrycode = '86') {
       try {
-        console.log('[UserStore] 手机号密码登录:', phone)
+        // console.log('[UserStore] 手机号密码登录:', phone)
         
         uni.showLoading({ title: '登录中...' })
         
@@ -519,7 +519,7 @@ export const useUserStore = defineStore('user', {
      */
     async loginByCaptcha(phone, captcha, countrycode = '86') {
       try {
-        console.log('[UserStore] 手机号验证码登录:', phone)
+        // console.log('[UserStore] 手机号验证码登录:', phone)
         
         uni.showLoading({ title: '登录中...' })
         
@@ -567,7 +567,7 @@ export const useUserStore = defineStore('user', {
      */
     async sendCaptchaCode(phone, countrycode = '86') {
       try {
-        console.log('[UserStore] 发送验证码:', phone)
+        // console.log('[UserStore] 发送验证码:', phone)
         
         uni.showLoading({ title: '发送中...' })
         
@@ -608,7 +608,7 @@ export const useUserStore = defineStore('user', {
      */
     async handleQrLogin(loginData) {
       try {
-        console.log('[UserStore] 处理扫码登录')
+        // console.log('[UserStore] 处理扫码登录')
         
         // 标记登录方式
         loginData.loginMethod = 'qr'
@@ -635,7 +635,7 @@ export const useUserStore = defineStore('user', {
      */
     async getQrKey() {
       try {
-        console.log('[UserStore] 获取二维码key')
+        // console.log('[UserStore] 获取二维码key')
         return await getQrKey()
       } catch (error) {
         console.error('[UserStore] 获取二维码key失败:', error)
@@ -648,7 +648,7 @@ export const useUserStore = defineStore('user', {
      */
     async getQrCreate(key) {
       try {
-        console.log('[UserStore] 生成二维码')
+        // console.log('[UserStore] 生成二维码')
         return await getQrCreate(key)
       } catch (error) {
         console.error('[UserStore] 生成二维码失败:', error)
@@ -661,7 +661,7 @@ export const useUserStore = defineStore('user', {
      */
     async checkQrStatus(key) {
       try {
-        console.log('[UserStore] 检查二维码状态')
+        // console.log('[UserStore] 检查二维码状态')
         return await checkQrStatus(key)
       } catch (error) {
         console.error('[UserStore] 检查二维码状态失败:', error)
@@ -674,7 +674,7 @@ export const useUserStore = defineStore('user', {
      */
     async fetchUserInfo() {
       try {
-        console.log('[UserStore] 获取用户信息')
+        // console.log('[UserStore] 获取用户信息')
         
         const res = await getLoginStatus()
         
@@ -695,7 +695,7 @@ export const useUserStore = defineStore('user', {
      */
     async fetchUserPlaylists() {
       try {
-        console.log('[UserStore] 获取用户歌单')
+        // console.log('[UserStore] 获取用户歌单')
         
         if (!this.isLogin || !this.userInfo.userId) {
           console.warn('[UserStore] 用户未登录，无法获取歌单')
@@ -718,7 +718,7 @@ export const useUserStore = defineStore('user', {
           this.createdPlaylists = created || []
           this.collectedPlaylists = collected || []
           
-          console.log('[UserStore] 用户歌单获取成功，创建:', created.length, '个，收藏:', collected.length, '个')
+          // console.log('[UserStore] 用户歌单获取成功，创建:', created.length, '个，收藏:', collected.length, '个')
           return { created, collected }
         } else {
           console.error('[UserStore] 获取用户歌单失败:', res)
@@ -741,7 +741,7 @@ export const useUserStore = defineStore('user', {
      */
     async fetchRecentSongs() {
       try {
-        console.log('[UserStore] 获取用户播放记录')
+        // console.log('[UserStore] 获取用户播放记录')
         
         if (!this.isLogin || !this.userInfo.userId) {
           console.warn('[UserStore] 用户未登录，无法获取播放记录')
@@ -775,7 +775,7 @@ export const useUserStore = defineStore('user', {
           // 更新状态
           this.recentSongs = recentSongs.slice(0, 10) || [] // 只保留前10首
         
-          console.log('[UserStore] 用户播放记录获取成功，共', recentSongs.length, '首')
+          // console.log('[UserStore] 用户播放记录获取成功，共', recentSongs.length, '首')
           return recentSongs
         } else {
           console.error('[UserStore] 获取用户播放记录失败:', res)
@@ -796,7 +796,7 @@ export const useUserStore = defineStore('user', {
      */
     async fetchAllUserData() {
       try {
-        console.log('[UserStore] 获取所有用户数据')
+        // console.log('[UserStore] 获取所有用户数据')
         
         // 并行获取歌单和播放记录
         const [playlistsResult, recordsResult] = await Promise.allSettled([
@@ -809,7 +809,7 @@ export const useUserStore = defineStore('user', {
           records: recordsResult.status === 'fulfilled' ? recordsResult.value : null
         }
         
-        console.log('[UserStore] 所有用户数据获取完成:', result)
+        // console.log('[UserStore] 所有用户数据获取完成:', result)
         return result
       } catch (error) {
         console.error('[UserStore] 获取所有用户数据异常:', error)
@@ -822,7 +822,7 @@ export const useUserStore = defineStore('user', {
      */
     async refreshUserData() {
       try {
-        console.log('[UserStore] 刷新用户数据')
+        // console.log('[UserStore] 刷新用户数据')
         
         // 先获取最新用户信息
         await this.fetchUserInfo()

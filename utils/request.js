@@ -22,7 +22,7 @@ const requestInterceptor = (options) => {
 	// 获取本地存储的 cookie
 	const cookie = uni.getStorageSync('cookie')
 	if (cookie) {
-		console.log('[Request] 本地 Cookie:', cookie.substring(0, 100) + '...')
+		// console.log('[Request] 本地 Cookie:', cookie.substring(0, 100) + '...')
 		
 		// 确保 cookie 是 MUSIC_U=xxx 格式
 		let cookieValue = cookie
@@ -38,7 +38,7 @@ const requestInterceptor = (options) => {
 			if (config.realIP) {
 				options.url += `&realIP=${config.realIP}`
 			}
-			console.log('[Request] Cookie 和 realIP 已添加到 URL')
+			// console.log('[Request] Cookie 和 realIP 已添加到 URL')
 		} 
 		// 对于 POST 请求，添加到 data 中
 		else {
@@ -49,7 +49,7 @@ const requestInterceptor = (options) => {
 			if (config.realIP && !options.data.realIP) {
 				options.data.realIP = config.realIP
 			}
-			console.log('[Request] Cookie 和 realIP 通过 data 传递')
+			// console.log('[Request] Cookie 和 realIP 通过 data 传递')
 		}
 	}
 	
@@ -72,7 +72,7 @@ const responseInterceptor = (response) => {
 				}
 			}
 			uni.setStorageSync('cookie', cookieValue)
-			console.log('[Request] Cookie 已保存（从 body）:', cookieValue.substring(0, 50) + '...')
+			// console.log('[Request] Cookie 已保存（从 body）:', cookieValue.substring(0, 50) + '...')
 		}
 		// 其次从响应头中获取
 		else if (response.cookies && response.cookies.length) {
@@ -81,7 +81,7 @@ const responseInterceptor = (response) => {
 			const match = cookieStr.match(/MUSIC_U=[^;]+/)
 			if (match) {
 				uni.setStorageSync('cookie', match[0])
-				console.log('[Request] Cookie 已保存（从 header）:', match[0].substring(0, 50) + '...')
+				// console.log('[Request] Cookie 已保存（从 header）:', match[0].substring(0, 50) + '...')
 			}
 		}
 		return data
@@ -97,9 +97,9 @@ const responseInterceptor = (response) => {
 const request = (options) => {
 	options = requestInterceptor(options)
 	
-	console.log('=== 请求参数 ===')
-	console.log('最终options:', options)
-	console.log('=== 请求参数结束 ===')
+	// console.log('=== 请求参数 ===')
+	// console.log('最终options:', options)
+	// console.log('=== 请求参数结束 ===')
 	
 	return new Promise((resolve, reject) => {
 		uni.request({
@@ -131,8 +131,8 @@ export const get = (url, params = {}) => {
 	
 	let fullUrl = queryString ? `${url}?${queryString}` : url
 	
-	console.log('GET 请求完整 URL:', fullUrl)
-	console.log('参数:', params)
+	// console.log('GET 请求完整 URL:', fullUrl)
+	// console.log('参数:', params)
 	
 	return request({
 		url: fullUrl,
@@ -142,8 +142,8 @@ export const get = (url, params = {}) => {
 
 // POST请求
 export const post = (url, data = {}) => {
-	console.log('POST请求URL:', url)
-	console.log('数据:', data)
+	// console.log('POST请求URL:', url)
+	// console.log('数据:', data)
 	
 	return request({
 		url,
