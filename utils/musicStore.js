@@ -2,7 +2,7 @@
  * 全局音乐播放状态管理
  */
 import { reactive, ref, computed } from 'vue'
-import { getSongDetail, getSongUrl, getLyric, getSongComment, getSongRedCount } from './api.js'
+import { getSongDetail, getSongUrl, getLyric, getSongComment, getSongRedCount, toggleSongLike, checkSongLike } from './api.js'
 
 // 当前播放请求ID，用于处理并发播放请求
 let currentPlayId = 0
@@ -209,7 +209,9 @@ const state = reactive({
 	// 红心数量
 	redCount: 0,
 	// 红心数量描述（后端返回的格式化字符串）
-	redCountDesc: '0'
+	redCountDesc: '0',
+	// 歌曲是否被喜欢
+	isLiked: false
 })
 
 // 歌曲名称
@@ -314,6 +316,9 @@ const playSongById = async (id) => {
 		// 获取红心数量
 		fetchRedCount(id)
 		
+		// 检查喜欢状态
+		checkLikeStatus(id)
+		
 		// 获取播放地址
 		const urlRes = await getSongUrl(id, 'standard')
 		
@@ -385,6 +390,53 @@ const fetchRedCount = async (id) => {
 		console.error('获取红心数量失败:', error)
 		state.redCount = 0
 		state.redCountDesc = '0'
+	}
+}
+
+// 检查歌曲是否被喜欢
+const checkLikeStatus = async (id) => {
+	try {
+		const res = await checkSongLike(id)
+		console.log('检查喜欢状态接口返回:', res)
+		if (res.code === 200) {
+			// 如果返回的 ids 数组包含该歌曲 id，说明已被喜欢
+			// 如果没有喜欢的歌曲，ids 数组为空或者不包含当前 id
+			const likedIds = res.ids || []
+			// 转为数字类型进行比较，避免类型不匹配的问题
+			const songId = Number(id)
+			state.isLiked = likedIds.some(likedId => Number(likedId) === songId)
+			console.log(`歌曲${id}的喜欢状态:`, state.isLiked ? '已喜欢' : '未喜欢', 'likedIds:', likedIds, 'songId:', songId)
+		} else {
+			state.isLiked = false
+			console.log('检查喜欢状态失败，code:', res.code)
+		}
+	} catch (error) {
+		console.error('检查喜欢状态失败:', error)
+		state.isLiked = false
+	}
+}
+
+// 切换喜欢状态
+const toggleLike = async (id) => {
+	try {
+		// 切换当前状态
+		const newLikeState = !state.isLiked
+		console.log('切换喜欢状态，当前状态:', state.isLiked ? '已喜欢' : '未喜欢', '目标状态:', newLikeState ? '已喜欢' : '未喜欢')
+		const res = await toggleSongLike(id, newLikeState)
+		console.log('切换喜欢状态接口返回:', res)
+		
+		if (res.code === 200) {
+			// 喜欢成功，更新状态
+			state.isLiked = newLikeState
+			console.log('切换喜欢状态成功，新状态:', state.isLiked ? '已喜欢' : '未喜欢')
+			return true
+		} else {
+			console.error('喜欢操作失败:', res)
+			return false
+		}
+	} catch (error) {
+		console.error('切换喜欢状态失败:', error)
+		return false
 	}
 }
 
@@ -512,7 +564,8 @@ export const useMusicStore = () => {
 		pause,
 		stop,
 		seekTo,
-		setProgress
+		setProgress,
+		toggleLike
 	}
 }
 
@@ -532,5 +585,6 @@ export default {
 	pause,
 	stop,
 	seekTo,
-	setProgress
+	setProgress,
+	toggleLike
 }

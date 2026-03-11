@@ -103,8 +103,8 @@
 
 		<!-- 操作按钮区域 -->
 		<view class="action-wrapper">
-			<view class="action-item">
-				<i class="iconfont icon-xihuan1 action-icon" />
+			<view class="action-item" @click="handleToggleLike">
+				<i class="iconfont action-icon" :class="musicStore.state.isLiked ? 'icon-xihuan' : 'icon-xihuan1'" :style="{ color: musicStore.state.isLiked ? '#EC4141' : '' }" />
 				<text class="action-badge" v-if="musicStore.state.redCount > 0">{{ musicStore.redCountStr.value }}</text>
 			</view>
 			<view class="action-item">
@@ -248,6 +248,26 @@ const dragTimeStr = computed(() => {
 // 播放/暂停切换
 const handleTogglePlay = () => {
 	musicStore.togglePlay()
+}
+
+// 切换喜欢状态
+const handleToggleLike = async () => {
+	if (!musicStore.state.currentSong?.id) return
+	
+	const success = await musicStore.toggleLike(musicStore.state.currentSong.id)
+	if (success) {
+		uni.showToast({
+			title: musicStore.state.isLiked ? '已添加到我喜欢' : '已取消喜欢',
+			icon: 'none',
+			duration: 1500
+		})
+	} else {
+		uni.showToast({
+			title: '操作失败，请重试',
+			icon: 'none',
+			duration: 1500
+		})
+	}
 }
 
 // 获取进度条位置信息

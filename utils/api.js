@@ -338,6 +338,25 @@ export const getSongRedCount = (id) => {
 	return get('/song/red/count', { id })
 }
 
+/**
+ * 喜欢音乐
+ * @param {Number} id - 歌曲 id
+ * @param {Boolean} like - true: 喜欢，false: 取消喜欢，默认 true
+ */
+export const toggleSongLike = (id, like = true) => {
+	return get('/like', { id, like })
+}
+
+/**
+ * 检查歌曲是否被喜爱
+ * @param {Array|Number} ids - 歌曲 id 或 id 数组
+ */
+export const checkSongLike = (ids) => {
+	// 如果是单个数字，转为数组
+	const idsArray = Array.isArray(ids) ? ids : [ids]
+	return get('/song/like/check', { ids: JSON.stringify(idsArray) })
+}
+
 // ==================== 搜索相关接口 ====================
 
 /**
@@ -669,6 +688,8 @@ export default {
 	getSongUrl,
 	getLyric,
 	getSongRedCount,
+	toggleSongLike,
+	checkSongLike,
 	// 搜索
 	search,
 	getSearchDefault,
