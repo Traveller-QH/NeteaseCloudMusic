@@ -186,6 +186,19 @@ const AudioPlayerManager = (() => {
 // 音频实例
 let audioContext = null
 
+// 音质等级映射（从低到高）
+const qualityLevels = [
+	{ level: 'standard', name: '标准', icon: '标', description: '128kbps' },
+	{ level: 'higher', name: '较高 High', icon: 'HI', description: '较标准音质更丰富的细节体验，最高 192kbps' },
+	{ level: 'exhigh', name: '极高 HQ', icon: 'HQ', description: '近 CD 音质的细节体验，最高 320kbps' },
+	{ level: 'lossless', name: '无损 SQ', icon: 'SQ', description: '高保真无损音质，最高 48kHz/16bit' },
+	{ level: 'hires', name: '高解析度无损 Hi-Res', icon: 'H', description: '更饱满清晰的高解析度音质，最高 192kHz/24bit' },
+	{ level: 'jyeffect', name: '高清臻音 Spatial Audio', icon: 'SP', description: '高频细节还原与清晰沉浸感，96kHz/24bit' },
+	{ level: 'sky', name: '沉浸环绕音 Surround Sound', icon: 'SU', description: '环绕音感 最高 5.1 声道' },
+	{ level: 'dolby', name: '杜比全景音 Dolby Atmos', icon: 'DA', description: '沉浸三维空间音频，最高 7.1.4 声道' },
+	{ level: 'jymaster', name: '超清母带 Master', icon: 'M', description: '极致细节 192kHz/24bit' }
+]
+
 // 全局音乐状态
 const state = reactive({
 	// 当前歌曲信息
@@ -200,7 +213,7 @@ const state = reactive({
 	songUrl: '',
 	// 加载状态
 	loading: false,
-	// 歌词列表 [{ time: 秒数, text: '歌词内容' }]
+	// 歌词列表 [{ time: 秒数，text: '歌词内容' }]
 	lyrics: [],
 	// 当前歌词索引
 	currentLyricIndex: 0,
@@ -211,7 +224,11 @@ const state = reactive({
 	// 红心数量描述（后端返回的格式化字符串）
 	redCountDesc: '0',
 	// 歌曲是否被喜欢
-	isLiked: false
+	isLiked: false,
+	// 当前音质等级
+	currentQuality: 'standard',
+	// 可用音质列表
+	availableQualities: []
 })
 
 // 歌曲名称
@@ -298,15 +315,27 @@ const playSongById = async (id) => {
 		const detailRes = await getSongDetail(id)
 		if (detailRes.code === 200 && detailRes.songs && detailRes.songs.length > 0) {
 			state.currentSong = detailRes.songs[0]
+					
+			// 从 privileges 中获取音质信息
+			if (detailRes.privileges && detailRes.privileges.length > 0) {
+				const privilege = detailRes.privileges[0]
+				// 使用 maxBrLevel 获取最高音质等级
+				const maxLevel = privilege.maxBrLevel || privilege.playMaxBrLevel || 'standard'
+				// 根据最高音质生成可用音质列表（从低到高）
+				generateAvailableQualities(maxLevel)
+			} else {
+				// 如果没有返回 privileges，使用默认列表
+				state.availableQualities = [...qualityLevels].reverse()
+			}
 		}
-		
+				
 		// 检查是否是最新的请求
 		if (requestId !== currentPlayId) {
 			console.log('有新的播放请求，取消当前请求')
 			state.loading = false
 			return
 		}
-		
+				
 		// 获取歌词
 		fetchLyric(id)
 		
@@ -361,6 +390,61 @@ const fetchLyric = async (id) => {
 		}
 	} catch (error) {
 		console.error('获取歌词失败:', error)
+	}
+}
+
+// 根据最高音质生成可用音质列表
+const generateAvailableQualities = (maxLevel) => {
+	// 找到最高音质的索引
+	const maxIndex = qualityLevels.findIndex(q => q.level === maxLevel)
+	
+	if (maxIndex === -1) {
+		// 如果找不到，使用默认列表
+		state.availableQualities = [...qualityLevels].reverse()
+		return
+	}
+	
+	// 截取从 0 到最高音质的部分，然后反转（从高到低显示）
+	state.availableQualities = qualityLevels.slice(0, maxIndex + 1).reverse()
+}
+
+// 切换音质
+const switchQuality = async (newLevel) => {
+	if (!state.currentSong?.id || newLevel === state.currentQuality) return
+	
+	try {
+		state.loading = true
+		
+		// 获取新音质的 URL
+		const urlRes = await getSongUrl(state.currentSong.id, newLevel)
+		
+		if (urlRes.code === 200 && urlRes.data && urlRes.data.length > 0) {
+			const url = urlRes.data[0].url
+			if (url) {
+				// 保存当前播放进度
+				const currentTime = state.currentTime
+				
+				// 更新音质和 URL
+				state.currentQuality = newLevel
+				state.songUrl = url
+				
+				// 重新播放
+				await AudioPlayerManager.safePlay(url)
+				
+				// 恢复到之前的播放进度
+				AudioPlayerManager.seek(currentTime)
+				
+				state.loading = false
+				return true
+			}
+		}
+		
+		state.loading = false
+		return false
+	} catch (error) {
+		console.error('切换音质失败:', error)
+		state.loading = false
+		return false
 	}
 }
 
@@ -499,7 +583,30 @@ const updateCurrentLyricIndex = () => {
 	}
 }
 
-// 播放音乐（通过URL）
+// 获取音质等级显示名称
+const getQualityName = (level) => {
+	const quality = qualityLevels.find(q => q.level === level)
+	return quality ? quality.name : level
+}
+
+// 获取音质图标
+const getQualityIcon = (level) => {
+	const quality = qualityLevels.find(q => q.level === level)
+	return quality ? quality.icon : '标'
+}
+
+// 获取音质描述
+const getQualityDescription = (level) => {
+	const quality = qualityLevels.find(q => q.level === level)
+	return quality ? quality.description : ''
+}
+
+// 获取音质等级映射
+const getQualityLevel = (level) => {
+	return qualityLevels.find(q => q.level === level) || null
+}
+
+// 播放音乐（通过 URL）
 const playMusic = (url) => {
 	AudioPlayerManager.safePlay(url)
 }
@@ -565,7 +672,12 @@ export const useMusicStore = () => {
 		stop,
 		seekTo,
 		setProgress,
-		toggleLike
+		toggleLike,
+		switchQuality,
+		getQualityName,
+		getQualityIcon,
+		getQualityDescription,
+		getQualityLevel
 	}
 }
 
@@ -586,5 +698,10 @@ export default {
 	stop,
 	seekTo,
 	setProgress,
-	toggleLike
+	toggleLike,
+	switchQuality,
+	getQualityName,
+	getQualityIcon,
+	getQualityDescription,
+	getQualityLevel
 }
