@@ -14,7 +14,7 @@
 			// 先尝试从本地存储恢复用户信息
 			const restored = userStore.restoreLoginState()
 			if (restored) {
-				console.log('[App] 从本地存储成功恢复用户信息')
+				// console.log('[App] 从本地存储成功恢复用户信息')
 				// 验证登录状态是否仍然有效
 				userStore.validateLoginStatus().then((valid) => {
 					if (valid) {
@@ -23,7 +23,7 @@
 					}
 				})
 			} else {
-				console.log('[App] 本地无存储的用户信息，检查登录状态')
+				// console.log('[App] 本地无存储的用户信息，检查登录状态')
 				// 没有本地存储信息，验证登录状态
 				userStore.validateLoginStatus()
 			}
