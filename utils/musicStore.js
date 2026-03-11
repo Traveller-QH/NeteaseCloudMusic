@@ -79,7 +79,7 @@ const AudioPlayerManager = (() => {
 		
 		// 如果有正在等待的播放Promise，先取消它
 		if (pendingPlayPromise) {
-			console.log('取消之前的播放请求')
+			// console.log('取消之前的播放请求')
 		}
 		
 		// 如果正在播放，先停止
@@ -100,23 +100,23 @@ const AudioPlayerManager = (() => {
 				
 				// 检查是否还是当前的播放请求
 				if (playId === currentPlayId) {
-					console.log('音频播放成功')
+					// console.log('音频播放成功')
 					isPlaying = true
 					state.isPlaying = true
 				} else {
-					console.log('播放成功但已被新请求取代')
+					// console.log('播放成功但已被新请求取代')
 				}
 			}
 		} catch (error) {
 			// 检查是否还是当前的播放请求
 			if (playId !== currentPlayId) {
-				console.log('播放错误已被新请求取代，忽略')
+				// console.log('播放错误已被新请求取代，忽略')
 				return
 			}
 			
 			// 处理具体的错误类型
 			if (error.name === 'AbortError') {
-				console.log('播放被新请求中断，已忽略')
+				// console.log('播放被新请求中断，已忽略')
 				return
 			}
 			
@@ -331,7 +331,7 @@ const playSongById = async (id) => {
 				
 		// 检查是否是最新的请求
 		if (requestId !== currentPlayId) {
-			console.log('有新的播放请求，取消当前请求')
+			// console.log('有新的播放请求，取消当前请求')
 			state.loading = false
 			return
 		}
@@ -353,7 +353,7 @@ const playSongById = async (id) => {
 		
 		// 再次检查是否是最新的请求
 		if (requestId !== currentPlayId) {
-			console.log('有新的播放请求，取消当前请求')
+			// console.log('有新的播放请求，取消当前请求')
 			state.loading = false
 			return
 		}
@@ -372,7 +372,7 @@ const playSongById = async (id) => {
 	} catch (error) {
 		// 检查是否是最新的请求
 		if (requestId !== currentPlayId) {
-			console.log('有新的播放请求，忽略错误')
+			// console.log('有新的播放请求，忽略错误')
 			return
 		}
 		
@@ -481,7 +481,7 @@ const fetchRedCount = async (id) => {
 const checkLikeStatus = async (id) => {
 	try {
 		const res = await checkSongLike(id)
-		console.log('检查喜欢状态接口返回:', res)
+		// console.log('检查喜欢状态接口返回:', res)
 		if (res.code === 200) {
 			// 如果返回的 ids 数组包含该歌曲 id，说明已被喜欢
 			// 如果没有喜欢的歌曲，ids 数组为空或者不包含当前 id
@@ -489,10 +489,10 @@ const checkLikeStatus = async (id) => {
 			// 转为数字类型进行比较，避免类型不匹配的问题
 			const songId = Number(id)
 			state.isLiked = likedIds.some(likedId => Number(likedId) === songId)
-			console.log(`歌曲${id}的喜欢状态:`, state.isLiked ? '已喜欢' : '未喜欢', 'likedIds:', likedIds, 'songId:', songId)
+			// console.log(`歌曲${id}的喜欢状态:`, state.isLiked ? '已喜欢' : '未喜欢', 'likedIds:', likedIds, 'songId:', songId)
 		} else {
 			state.isLiked = false
-			console.log('检查喜欢状态失败，code:', res.code)
+			// console.log('检查喜欢状态失败，code:', res.code)
 		}
 	} catch (error) {
 		console.error('检查喜欢状态失败:', error)
@@ -505,14 +505,14 @@ const toggleLike = async (id) => {
 	try {
 		// 切换当前状态
 		const newLikeState = !state.isLiked
-		console.log('切换喜欢状态，当前状态:', state.isLiked ? '已喜欢' : '未喜欢', '目标状态:', newLikeState ? '已喜欢' : '未喜欢')
+		// console.log('切换喜欢状态，当前状态:', state.isLiked ? '已喜欢' : '未喜欢', '目标状态:', newLikeState ? '已喜欢' : '未喜欢')
 		const res = await toggleSongLike(id, newLikeState)
-		console.log('切换喜欢状态接口返回:', res)
+		// console.log('切换喜欢状态接口返回:', res)
 		
 		if (res.code === 200) {
 			// 喜欢成功，更新状态
 			state.isLiked = newLikeState
-			console.log('切换喜欢状态成功，新状态:', state.isLiked ? '已喜欢' : '未喜欢')
+			// console.log('切换喜欢状态成功，新状态:', state.isLiked ? '已喜欢' : '未喜欢')
 			return true
 		} else {
 			console.error('喜欢操作失败:', res)

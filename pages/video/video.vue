@@ -440,7 +440,7 @@ const formatDate = (timestamp) => {
 
 // 初始化视频
 const initVideo = async () => {
-  console.log('开始初始化视频，视频 ID:', videoId.value)
+  // console.log('开始初始化视频，视频 ID:', videoId.value)
   try {
     await Promise.all([
       loadVideoDetailInfo(),
@@ -492,7 +492,7 @@ const loadVideoDetailInfo = async () => {
       videoInfo.value = mvDetailRes.data || {}
     }
   } catch (error) {
-    console.log('获取 MV 详情失败:', error.message)
+    // console.log('获取 MV 详情失败:', error.message)
   }
   
   try {
@@ -504,7 +504,7 @@ const loadVideoDetailInfo = async () => {
       liked.value = mvInfoRes.isSubed || mvInfoRes.data?.isSubed || false
     }
   } catch (error) {
-    console.log('获取 MV 详情信息失败:', error.message)
+    // console.log('获取 MV 详情信息失败:', error.message)
   }
   
   try {
@@ -513,7 +513,7 @@ const loadVideoDetailInfo = async () => {
       mvWiki.value = mvWikiRes.data || {}
     }
   } catch (error) {
-    console.log('获取 MV 百科信息失败:', error.message)
+    // console.log('获取 MV 百科信息失败:', error.message)
   }
 }
 
@@ -971,15 +971,15 @@ const handleShare = () => {
 
 // 视频事件处理
 const onVideoPlay = () => {
-  console.log('视频开始播放')
+  // console.log('视频开始播放')
 }
 
 const onVideoPause = () => {
-  console.log('视频暂停')
+  // console.log('视频暂停')
 }
 
 const onVideoEnded = () => {
-  console.log('视频播放结束')
+  // console.log('视频播放结束')
 }
 
 const onVideoError = (e) => {
@@ -998,8 +998,8 @@ onMounted(async () => {
 
   if (options.id) {
     videoId.value = options.id
-    console.log('接收到的视频 ID:', videoId.value, '类型:', typeof videoId.value)
-    console.log('当前用户状态:', userStore.state)
+    // console.log('接收到的视频 ID:', videoId.value, '类型:', typeof videoId.value)
+    // console.log('当前用户状态:', userStore.state)
     await initVideo()
   }
 })

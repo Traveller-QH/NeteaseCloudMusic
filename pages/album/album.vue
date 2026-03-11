@@ -234,7 +234,7 @@ const fetchAlbumDetail = async (id) => {
 const fetchAlbumDynamic = async (id) => {
   try {
     const res = await getAlbumDetailDynamic(id)
-    console.log('专辑动态信息响应:', res)
+    // console.log('专辑动态信息响应:', res)
     if (res.code === 200) {
       // 根据实际返回的字段名赋值（数据在根级别）
       favoriteCount.value = res.subCount || 0

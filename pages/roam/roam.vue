@@ -262,7 +262,7 @@ onUnmounted(() => {})
 
 // tab切换
 const onTabChange = (name) => {
-	console.log('Tab changed to:', name)
+	// console.log('Tab changed to:', name)
 }
 
 

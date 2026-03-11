@@ -793,7 +793,7 @@ const searchResultsData = async (type = 1018) => {
         }
 
         // 调试信息
-        console.log('综合搜索结果:', {
+        /*console.log('综合搜索结果:', {
           songs: allResults.value.songs.length,
           playlists: allResults.value.playlists.length,
           albums: allResults.value.albums.length,
@@ -802,7 +802,7 @@ const searchResultsData = async (type = 1018) => {
           users: allResults.value.users.length,
           radios: allResults.value.radios.length,
           voices: allResults.value.voices.length
-        })
+        })*/
 
         // 特殊处理：为视频、播客、声音分类单独请求数据（当在综合分类下时）
         if (activeTab.value === 'all') {
@@ -813,7 +813,7 @@ const searchResultsData = async (type = 1018) => {
                 const videoResult = videoRes.result || videoRes.data
                 const fullVideoData = videoResult?.mvs || videoResult?.videos || videoResult?.video?.videos || []
                 videoResults.value = fullVideoData
-                console.log('视频数据加载完成:', fullVideoData.length, '条，显示前5条')
+                // console.log('视频数据加载完成:', fullVideoData.length, '条，显示前5条')
               }
             }).catch(error => {
               console.error('视频数据加载失败:', error)
@@ -827,7 +827,7 @@ const searchResultsData = async (type = 1018) => {
                 const radioResult = radioRes.result || radioRes.data
                 const fullRadioData = radioResult?.djRadios || radioResult?.djRadio?.djRadios || []
                 radioResults.value = fullRadioData
-                console.log('播客数据加载完成:', fullRadioData.length, '条，显示前5条')
+                // console.log('播客数据加载完成:', fullRadioData.length, '条，显示前5条')
               }
             }).catch(error => {
               console.error('播客数据加载失败:', error)
@@ -841,7 +841,7 @@ const searchResultsData = async (type = 1018) => {
                 const voiceResult = voiceRes.result || voiceRes.data
                 const fullVoiceData = voiceResult?.resources?.filter(item => item.resourceType === 'voice') || voiceResult?.soundList || voiceResult?.voice?.soundList || []
                 voiceResults.value = fullVoiceData
-                console.log('声音数据加载完成:', fullVoiceData.length, '条，显示前3条')
+                // console.log('声音数据加载完成:', fullVoiceData.length, '条，显示前3条')
               }
             }).catch(error => {
               console.error('声音数据加载失败:', error)
