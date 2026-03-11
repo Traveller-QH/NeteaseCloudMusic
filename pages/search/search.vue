@@ -272,6 +272,7 @@ onShow(() => {
 .status_bar {
   height: var(--status-bar-height);
   width: 100%;
+  background-color: white;
 }
 
 .search-navbar {

@@ -982,6 +982,7 @@ onMounted(async () => {
 .status_bar {
   height: var(--status-bar-height);
   width: 100%;
+  background: linear-gradient(180deg, #EC4141 0%, #EC4141 100%);
 }
 
 // 顶部导航栏

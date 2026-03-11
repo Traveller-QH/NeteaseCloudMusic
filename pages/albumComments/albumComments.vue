@@ -827,6 +827,7 @@ onMounted(async () => {
 .status_bar {
   height: var(--status-bar-height);
   width: 100%;
+  background-color: white;
 }
 
 // 顶部导航
