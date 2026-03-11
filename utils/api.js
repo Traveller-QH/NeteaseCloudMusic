@@ -317,7 +317,18 @@ export const getSongDetail = (ids) => {
 }
 
 /**
- * 获取歌曲URL
+ * 获取歌曲 URL
+ * @param {Number|String} id - 歌曲 id
+ * @param {String} level - 播放音质等级
+ * standard => 标准
+ * higher => 较高
+ * exhigh => 极高
+ * lossless => 无损
+ * hires => 高解析度无损
+ * jyeffect => 高清臻音
+ * sky => 沉浸环绕声
+ * dolby => 杜比全景声
+ * jymaster => 超清母带
  */
 export const getSongUrl = (id, level = 'standard') => {
 	return get('/song/url/v1', { id, level })
