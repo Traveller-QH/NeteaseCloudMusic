@@ -32,7 +32,8 @@ export const useUserStore = defineStore('user', {
       accountStatus: 0,
       followeds: 0,
       follows: 0,
-      playlistCount: 0
+      playlistCount: 0,
+      level: 0  // 用户等级
     },
     // 账户信息
     accountInfo: {
@@ -212,8 +213,12 @@ export const useUserStore = defineStore('user', {
     /**
      * 更新用户基本信息
      */
-    updateUserInfo(profile) {
-      this.userInfo = {
+    updateUserInfo(data) {
+      // 使用 Object.assign 确保响应式更新
+      // data 可能是完整的接口响应（包含 level 在根级别）或 profile 对象
+      const profile = data.profile || data
+      
+      Object.assign(this.userInfo, {
         userId: profile.userId || profile.id || 0,
         nickname: profile.nickname || '',
         avatarUrl: profile.avatarUrl || '',
@@ -228,8 +233,10 @@ export const useUserStore = defineStore('user', {
         accountStatus: profile.accountStatus || 0,
         followeds: profile.followeds || 0,
         follows: profile.follows || 0,
-        playlistCount: profile.playlistCount || 0
-      }
+        playlistCount: profile.playlistCount || 0,
+        // 优先从根级别获取 level，如果没有则从 profile 中获取
+        level: data.level !== undefined ? data.level : (profile.level || 0)
+      })
       
       // 持久化用户信息
       uni.setStorageSync('userInfo', JSON.stringify(this.userInfo))
@@ -389,7 +396,8 @@ export const useUserStore = defineStore('user', {
         accountStatus: 0,
         followeds: 0,
         follows: 0,
-        playlistCount: 0
+        playlistCount: 0,
+        level: 0
       }
       this.accountInfo = {
         id: 0,
@@ -442,20 +450,38 @@ export const useUserStore = defineStore('user', {
       try {
         // console.log('[UserStore] 用户退出登录')
         
-        // 清除登录状态
-        this.clearLoginState()
+        // 1. 先调用接口通知服务器清除登录状态
+        const { logout: logoutApi } = await import('@/utils/api.js')
+        const result = await logoutApi()
         
-        // 显示提示
-        uni.showToast({
-          title: '已退出登录',
-          icon: 'success'
-        })
-        
-        return true
+        // 2. 确保服务器接口调用成功后，才清除本地数据
+        if (result.code === 200) {
+          // console.log('[UserStore] 服务器登录状态已清除')
+          
+          // 3. 清除本地存储和状态
+          this.clearLoginState()
+          
+          // 4. 显示提示
+          uni.showToast({
+            title: '已退出登录',
+            icon: 'success'
+          })
+          
+          return true
+        } else {
+          // 服务器接口调用失败，不清除本地数据
+          console.error('[UserStore] 服务器退出登录失败:', result)
+          uni.showToast({
+            title: '退出失败，请重试',
+            icon: 'none'
+          })
+          return false
+        }
       } catch (error) {
-        console.error('[UserStore] 退出登录失败:', error)
+        console.error('[UserStore] 退出登录异常:', error)
+        // 接口调用异常，不清除本地数据
         uni.showToast({
-          title: '退出失败',
+          title: '退出失败，请重试',
           icon: 'none'
         })
         return false
@@ -472,17 +498,16 @@ export const useUserStore = defineStore('user', {
       try {
         // console.log('[UserStore] 手机号密码登录:', phone)
         
-        uni.showLoading({ title: '登录中...' })
+        uni.showLoading({ title: '登录中...', mask: true })
         
         const res = await loginByPhone(phone, password, countrycode)
-        
-        uni.hideLoading()
         
         if (res.code === 200) {
           // 标记登录方式
           res.loginMethod = 'password'
           await this.setLoginState(res)
           
+          uni.hideLoading()
           uni.showToast({
             title: '登录成功',
             icon: 'success'
@@ -490,6 +515,7 @@ export const useUserStore = defineStore('user', {
           
           return true
         } else {
+          uni.hideLoading()
           const errorMsg = res.message || res.msg || '登录失败'
           uni.showToast({
             title: errorMsg,
@@ -521,17 +547,16 @@ export const useUserStore = defineStore('user', {
       try {
         // console.log('[UserStore] 手机号验证码登录:', phone)
         
-        uni.showLoading({ title: '登录中...' })
+        uni.showLoading({ title: '登录中...', mask: true })
         
         const res = await loginByCaptcha(phone, captcha, countrycode)
-        
-        uni.hideLoading()
         
         if (res.code === 200) {
           // 标记登录方式
           res.loginMethod = 'captcha'
           await this.setLoginState(res)
           
+          uni.hideLoading()
           uni.showToast({
             title: '登录成功',
             icon: 'success'
@@ -539,6 +564,7 @@ export const useUserStore = defineStore('user', {
           
           return true
         } else {
+          uni.hideLoading()
           const errorMsg = res.message || res.msg || '登录失败'
           uni.showToast({
             title: errorMsg,
@@ -569,19 +595,19 @@ export const useUserStore = defineStore('user', {
       try {
         // console.log('[UserStore] 发送验证码:', phone)
         
-        uni.showLoading({ title: '发送中...' })
+        uni.showLoading({ title: '发送中...', mask: true })
         
         const res = await sendCaptcha(phone, countrycode)
         
-        uni.hideLoading()
-        
         if (res.code === 200) {
+          uni.hideLoading()
           uni.showToast({
             title: '验证码已发送',
             icon: 'success'
           })
           return true
         } else {
+          uni.hideLoading()
           const errorMsg = res.message || res.msg || '发送失败'
           uni.showToast({
             title: errorMsg,

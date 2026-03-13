@@ -205,6 +205,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '@/utils/userStore.js'
+import { getUserDetail } from '@/utils/api.js'
 import AppTabBar from '@/components/AppTabBar/AppTabBar.vue'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import PlayBar from '@/components/PlayBar/PlayBar.vue'
@@ -218,19 +219,10 @@ const showCollected = ref(false)
 // 滚动控制
 const scrollTop = ref(0)
 
-// 处理滚动事件，防止滚动溢出
+// 处理滚动事件（仅用于记录滚动位置，不干预滚动行为）
 const onScroll = (e) => {
 	const currentScrollTop = e.detail.scrollTop
-
-	// 防止滚动溢出
-	const maxScrollTop = e.target.scrollHeight - e.target.clientHeight
-	if (currentScrollTop <= 0) {
-		// 滚动到顶部时，锁定在顶部
-		scrollTop.value = 0
-	} else if (currentScrollTop >= maxScrollTop) {
-		// 滚动到底部时，锁定在底部
-		scrollTop.value = maxScrollTop
-	}
+	scrollTop.value = currentScrollTop
 }
 
 // 打开侧边栏
@@ -284,9 +276,9 @@ const toggleCollected = () => {
 	showCollected.value = !showCollected.value
 }
 
-// 用户等级
+// 用户等级（从 userInfo 中获取）
 const userLevel = computed(() => {
-	return userStore.level || 0
+	return userInfo.value?.level || 0
 })
 
 // VIP类型
@@ -360,27 +352,56 @@ const initData = async () => {
 	userStore.collectedPlaylists = []
 	userStore.recentSongs = []
 	
-	// 如果已经登录且有userId，直接刷新数据，不需要重新检查登录状态
+	// 如果已经登录且有 userId，直接刷新数据
 	if (userStore.isLogin && userStore.userInfo.userId) {
 		// console.log('已登录，刷新用户数据')
-		await userStore.refreshUserData()
+		
+		// 1. 先获取用户详情（包含等级、粉丝、关注等）
+		try {
+			const userDetailRes = await getUserDetail(userStore.userInfo.userId)
+			if (userDetailRes && userDetailRes.code === 200 && userDetailRes.profile) {
+				// 更新用户信息到 store（传递完整响应数据，因为 level 在根级别）
+				userStore.updateUserInfo(userDetailRes)
+				// console.log('用户详情获取成功:', userDetailRes.profile)
+				
+				// 2. 然后获取用户数据（歌单和播放记录）- 不要调用 refreshUserData，避免覆盖用户信息
+				await Promise.all([
+					userStore.fetchUserPlaylists(),
+					userStore.fetchRecentSongs()
+				])
+			}
+		} catch (error) {
+			console.error('获取用户详情失败:', error)
+		}
 		return
 	}
 	
-	// 未登录时，检查本地存储的cookie是否有效
+	// 未登录时，检查本地存储的 cookie 是否有效
 	const cookie = uni.getStorageSync('cookie')
 	if (cookie) {
-		// console.log('有本地cookie，检查登录状态')
+		// console.log('有本地 cookie，检查登录状态')
 		const loggedIn = await userStore.validateLoginStatus()
 		// console.log('登录状态:', loggedIn)
 		if (loggedIn) {
+			// 获取用户详情
+			try {
+				const userDetailRes = await getUserDetail(userStore.userInfo.userId)
+				if (userDetailRes && userDetailRes.code === 200 && userDetailRes.profile) {
+					// 传递完整响应数据，因为 level 在根级别
+					userStore.updateUserInfo(userDetailRes)
+				}
+			} catch (error) {
+				console.error('获取用户详情失败:', error)
+			}
+			
+			// 获取歌单和播放记录
 			await Promise.all([
 				userStore.fetchUserPlaylists(),
 				userStore.fetchRecentSongs()
 			])
 		}
 	} else {
-		// console.log('无本地cookie，未登录')
+		// console.log('无本地 cookie，未登录')
 	}
 }
 

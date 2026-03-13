@@ -240,8 +240,6 @@ const stopCaptchaCountdown = () => {
 const handleLogin = async () => {
 	if (!canLogin.value) return
 	
-	uni.showLoading({ title: '登录中...' })
-	
 	try {
 		let success = false
 		
@@ -260,8 +258,6 @@ const handleLogin = async () => {
 		}
 		
 		if (success) {
-			// 登录成功后获取用户数据
-			await userStore.refreshUserData()
 			uni.showToast({
 				title: '登录成功',
 				icon: 'success'
@@ -275,8 +271,6 @@ const handleLogin = async () => {
 		}
 	} catch (error) {
 		console.error('登录失败:', error)
-	} finally {
-		uni.hideLoading()
 	}
 }
 
