@@ -24,9 +24,7 @@
       <text class="user-name">{{ userInfo.profile?.nickname }}</text>
       
       <!-- IP 属地 -->
-      <text class="user-location" v-if="userLocation">
-        IP:{{ userLocation }}
-      </text>
+      <text class="user-location" v-if="userLocation">IP:{{ userLocation }}</text>
       
       <!-- 基础信息 -->
       <view class="user-stats">
