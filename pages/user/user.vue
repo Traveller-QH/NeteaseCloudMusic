@@ -34,7 +34,7 @@
         <text class="stat-divider">|</text>
         <text class="stat-item">{{ formatCount(fansCnt) }} 粉丝</text>
         <text class="stat-divider">|</text>
-        <text class="stat-item">Lv{{ userInfo.level }}</text>
+        <text class="stat-item">Lv{{ userInfo.level }} 等级</text>
       </view>
     </view>
 
