@@ -90,6 +90,13 @@
         "navigationStyle": "custom",
         "navigationBarTitleText": "歌手"
       }
+    },
+    {
+      "path": "pages/user/user",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "用户"
+      }
     }
   ],
   "globalStyle": {

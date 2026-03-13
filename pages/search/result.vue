@@ -1056,8 +1056,10 @@ const goToArtist = (artist) => {
 
 // 跳转到用户详情
 const goToUser = (user) => {
+  // 优先使用 userId，如果没有则使用 id
+  const uid = user.userId || user.id
   uni.navigateTo({
-    url: `/pages/my/my?userId=${user.userId || user.id}`
+    url: `/pages/user/user?id=${uid}`
   })
 }
 
