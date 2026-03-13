@@ -55,6 +55,30 @@
       </scroll-view>
     </view>
 
+    <!-- 排序导航条 - 歌曲 -->
+    <view class="sort-navbar" v-if="activeTab === 'songs'">
+      <view class="sort-left">TA 的作品</view>
+      <view class="sort-right" @click="showSongSortMenu = true">
+        <i class="iconfont icon-paixufangshi sort-icon"/>
+      </view>
+    </view>
+
+    <!-- 排序导航条 - 专辑 -->
+    <view class="sort-navbar" v-if="activeTab === 'albums'">
+      <view class="sort-left">按发行时间排序</view>
+      <view class="sort-right" @click="showAlbumSortMenu = true">
+        <i class="iconfont icon-paixufangshi sort-icon"/>
+      </view>
+    </view>
+
+    <!-- 排序导航条 - 视频 -->
+    <view class="sort-navbar" v-if="activeTab === 'videos'">
+      <view class="sort-left">MV</view>
+      <!--<view class="sort-right" @click="toggleVideoSort">
+        <i class="iconfont icon-a-Descendingorderjiangxu sort-icon"/>
+      </view>-->
+    </view>
+
     <!-- 内容区域 -->
     <scroll-view
       class="content-scroll"
@@ -64,6 +88,25 @@
     >
       <!-- 主页 -->
       <view v-if="activeTab === 'home'">
+        <!-- 艺人百科卡片 -->
+        <view class="section-card" v-if="artistWiki" @click="showWikiDetail = true">
+          <view class="card-header">
+            <text class="card-title">艺人百科<i class="iconfont icon-arrow-right" /></text>
+          </view>
+          <view class="wiki-content">
+            <text class="wiki-artist-name">{{ artistInfo.artist?.name }}</text>
+            <text class="wiki-gender-zodiac">
+              {{ artistInfo.user.gender === 1 ? '男' : '女' }}
+              {{
+                getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
+                    ? '/' + getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
+                    : ''
+              }}
+            </text>
+            <text class="wiki-desc">{{ artistWiki.desc || artistWiki.briefDesc || artistWiki.introduction }}</text>
+          </view>
+        </view>
+
         <!-- 热门作品卡片 -->
         <view class="section-card" v-if="hotSongs.length > 0">
           <view class="card-header">
@@ -87,37 +130,10 @@
             </view>
           </view>
         </view>
-
-        <!-- 艺人百科卡片 -->
-        <view class="section-card" v-if="artistWiki" @click="showWikiDetail = true">
-          <view class="card-header">
-            <text class="card-title">艺人百科<i class="iconfont icon-arrow-right" /></text>
-          </view>
-          <view class="wiki-content">
-            <text class="wiki-artist-name">{{ artistInfo.artist?.name }}</text>
-            <text class="wiki-gender-zodiac">
-              {{ artistInfo.user.gender === 1 ? '男' : '女' }}
-              {{
-                getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
-                    ? '/' + getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
-                    : ''
-              }}
-            </text>
-            <text class="wiki-desc">{{ artistWiki.desc || artistWiki.briefDesc || artistWiki.introduction }}</text>
-          </view>
-        </view>
       </view>
 
       <!-- 歌曲 -->
       <view v-if="activeTab === 'songs'">
-        <!-- 导航条 -->
-        <view class="sort-navbar">
-          <view class="sort-left">热门 50 首</view>
-          <view class="sort-right" @click="showSongSortMenu = true">
-            <i class="iconfont icon-paixufangshi sort-icon"/>
-          </view>
-        </view>
-
         <!-- 歌曲列表 -->
         <view class="song-list">
           <view
@@ -150,14 +166,6 @@
 
       <!-- 专辑 -->
       <view v-if="activeTab === 'albums'">
-        <!-- 导航条 -->
-        <view class="sort-navbar">
-          <view class="sort-left">按发行时间排序</view>
-          <view class="sort-right" @click="showAlbumSortMenu = true">
-            <i class="iconfont icon-paixufangshi sort-icon"/>
-          </view>
-        </view>
-
         <!-- 专辑列表 -->
         <view class="album-list">
           <view
@@ -182,14 +190,6 @@
 
       <!-- 视频 -->
       <view v-if="activeTab === 'videos'">
-        <!-- 导航条 -->
-        <view class="sort-navbar">
-          <view class="sort-left">MV</view>
-          <view class="sort-right" @click="toggleVideoSort">
-            <i class="iconfont icon-a-Descendingorderjiangxu sort-icon"/>
-          </view>
-        </view>
-
         <!-- 视频列表 -->
         <view class="video-list">
           <view
@@ -302,63 +302,66 @@
           </text>
         </view>
 
-        <!-- 基本信息卡片 -->
-        <view class="info-card">
-          <view class="info-card-header">
-            <text class="info-card-title">基本信息</text>
+        <!-- 可滚动内容区域 -->
+        <scroll-view scroll-y class="wiki-scroll-content">
+          <!-- 基本信息卡片 -->
+          <view class="info-card">
+            <view class="info-card-header">
+              <text class="info-card-title">基本信息</text>
+            </view>
+            <view class="info-card-content">
+              <view class="info-row" v-if="artistInfo.identify?.imageDesc">
+                <text class="info-label">身份：</text>
+                <text class="info-value">{{ artistInfo.identify.imageDesc }}</text>
+              </view>
+              <view class="info-row" v-if="artistWiki?.alias">
+                <text class="info-label">艺人别名：</text>
+                <text class="info-value">{{ artistWiki.alias }}</text>
+              </view>
+              <view class="info-row" v-if="artistInfo.secondaryExpertIdentiy && artistInfo.secondaryExpertIdentiy.length > 0">
+                <text class="info-label">音乐身份：</text>
+                <text class="info-value">{{ formatMusicIdentities(artistInfo.secondaryExpertIdentiy) }}</text>
+              </view>
+              <view class="info-row" v-if="artistInfo.user?.gender">
+                <text class="info-label">性别：</text>
+                <text class="info-value">{{ artistInfo.user.gender===1 ? '男' : '女' }}</text>
+              </view>
+              <view class="info-row" v-if="artistWiki?.school">
+                <text class="info-label">学校：</text>
+                <text class="info-value">{{ artistWiki.school }}</text>
+              </view>
+              <view class="info-row" v-if="artistInfo?.user">
+                <text class="info-label">地区：</text>
+                <text class="info-value">{{ getIpLocation(artistInfo.user) }}</text>
+              </view>
+              <view class="info-row" v-if="artistWiki?.desc">
+                <text class="info-label">生日：</text>
+                <text class="info-value">
+                  {{ extractBirthdayFromDesc(artistWiki.desc) }}
+                  {{
+                    getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
+                        ? getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
+                        : ''
+                  }}
+                </text>
+              </view>
+              <view class="info-row" v-if="artistWiki?.nation">
+                <text class="info-label">民族：</text>
+                <text class="info-value">{{ artistWiki.nation }}</text>
+              </view>
+            </view>
           </view>
-          <view class="info-card-content">
-            <view class="info-row" v-if="artistInfo.identify?.imageDesc">
-              <text class="info-label">身份：</text>
-              <text class="info-value">{{ artistInfo.identify.imageDesc }}</text>
-            </view>
-            <view class="info-row" v-if="artistWiki?.alias">
-              <text class="info-label">艺人别名：</text>
-              <text class="info-value">{{ artistWiki.alias }}</text>
-            </view>
-            <view class="info-row" v-if="artistInfo.secondaryExpertIdentiy && artistInfo.secondaryExpertIdentiy.length > 0">
-              <text class="info-label">音乐身份：</text>
-              <text class="info-value">{{ formatMusicIdentities(artistInfo.secondaryExpertIdentiy) }}</text>
-            </view>
-            <view class="info-row" v-if="artistInfo.user?.gender">
-              <text class="info-label">性别：</text>
-              <text class="info-value">{{ artistInfo.user.gender===1 ? '男' : '女' }}</text>
-            </view>
-            <view class="info-row" v-if="artistWiki?.school">
-              <text class="info-label">学校：</text>
-              <text class="info-value">{{ artistWiki.school }}</text>
-            </view>
-            <view class="info-row" v-if="artistInfo?.user">
-              <text class="info-label">地区：</text>
-              <text class="info-value">{{ getIpLocation(artistInfo.user) }}</text>
-            </view>
-            <view class="info-row" v-if="artistWiki?.desc">
-              <text class="info-label">生日：</text>
-              <text class="info-value">
-                {{ extractBirthdayFromDesc(artistWiki.desc) }}
-                {{
-                  getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
-                      ? getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
-                      : ''
-                }}
-              </text>
-            </view>
-            <view class="info-row" v-if="artistWiki?.nation">
-              <text class="info-label">民族：</text>
-              <text class="info-value">{{ artistWiki.nation }}</text>
-            </view>
-          </view>
-        </view>
 
-        <!-- 艺人简介卡片 -->
-        <view class="info-card">
-          <view class="info-card-header">
-            <text class="info-card-title">艺人简介</text>
+          <!-- 艺人简介卡片 -->
+          <view class="info-card">
+            <view class="info-card-header">
+              <text class="info-card-title">艺人简介</text>
+            </view>
+            <view class="info-card-content">
+              <text class="intro-text">{{ artistWiki.desc || artistWiki.briefDesc || artistWiki.introduction }}</text>
+            </view>
           </view>
-          <view class="info-card-content">
-            <text class="intro-text">{{ artistWiki.desc || artistWiki.briefDesc || artistWiki.introduction }}</text>
-          </view>
-        </view>
+        </scroll-view>
       </view>
     </view>
   </view>
@@ -1076,7 +1079,8 @@ onMounted(async () => {
     white-space: nowrap;
     
     .tabs-container {
-      display: inline-flex;
+      display: flex;
+      justify-content: center;
       
       .tab-item {
         padding: 24rpx 40rpx;
@@ -1133,10 +1137,14 @@ onMounted(async () => {
 
 // 歌曲列表
 .song-list {
+  background: #f5f5f5;
+  
   .song-item {
     display: flex;
     align-items: center;
-    padding: 20rpx 0;
+    padding: 24rpx 30rpx;
+    background: #fff;
+    margin-bottom: 1rpx;
     
     &:active {
       background: #f5f5f5;
@@ -1226,6 +1234,9 @@ onMounted(async () => {
   padding: 20rpx 30rpx;
   background: #fff;
   border-bottom: 1rpx solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
   
   .sort-left {
     font-size: 28rpx;
@@ -1559,6 +1570,7 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   border-bottom: 1rpx solid #f0f0f0;
+  flex-shrink: 0;
   
   .wiki-artist-avatar {
     width: 200rpx;
@@ -1578,6 +1590,13 @@ onMounted(async () => {
     font-size: 26rpx;
     color: #999;
   }
+}
+
+// 百科内容滚动区域
+.wiki-scroll-content {
+  flex: 1;
+  height: 0;
+  overflow-y: auto;
 }
 
 .info-card {
