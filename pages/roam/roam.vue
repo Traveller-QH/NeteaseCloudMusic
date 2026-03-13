@@ -16,9 +16,9 @@
 			<!-- 中间标题 -->
 			<view class="nav-title">漫游</view>
 			
-			<!-- 右侧时钟按钮 -->
-			<view class="nav-right" @click="() => {}">
-				<i class="iconfont icon-shijian nav-icon" />
+			<!-- 右侧搜索按钮 -->
+			<view class="nav-right" @click="handleSearchClick">
+				<i class="iconfont icon-sousuo nav-icon" />
 			</view>
 		</view>
 		
@@ -127,23 +127,40 @@
 		
 		<!-- 底部导航栏 -->
     <AppTabBar class="app-tabbar" :current-page="'roam'" @tabChange="onTabChange" />
+    
+    <!-- 搜索弹窗组件 -->
+    <SearchPopup v-model="showSearchPopup" @search="handleSearch" />
 	</view>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { onBackPress } from '@dcloudio/uni-app'
 import { getPersonalFm, getRecommendNewSong, getPersonalized } from '@/utils/api.js'
 import { useMusicStore } from '@/utils/musicStore.js'
 import AppTabBar from '@/components/AppTabBar/AppTabBar.vue'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import PlayBar from '@/components/PlayBar/PlayBar.vue'
+import SearchPopup from '@/components/SearchPopup/SearchPopup.vue'
 
 const musicStore = useMusicStore()
 
 const showSidebar = ref(false)
+const showSearchPopup = ref(false) // 控制搜索弹窗显示
 
 // 滚动控制
 const scrollTop = ref(0)
+
+// 处理返回键（使用 uni-app 的 onBackPress）
+onBackPress(() => {
+  if (showSearchPopup.value) {
+    // 如果搜索弹窗显示，关闭弹窗并阻止默认返回
+    showSearchPopup.value = false
+    return true // 阻止默认返回行为
+  }
+  // 返回 false 允许默认返回行为
+  return false
+})
 
 // 处理滚动事件，防止滚动溢出
 const onScroll = (e) => {
@@ -170,6 +187,18 @@ const closeSidebar = () => {
 	showSidebar.value = false
 }
 
+// 搜索点击处理 - 打开搜索弹窗
+const handleSearchClick = () => {
+  showSearchPopup.value = true
+}
+
+// 处理搜索事件 - 跳转到搜索结果页
+const handleSearch = (keyword) => {
+  uni.navigateTo({
+    url: `/pages/search/result?keyword=${encodeURIComponent(keyword)}`
+  })
+}
+
 // 漫游模式
 const roamModes = ref([
 	{ name: '私人fm', desc: '专属你的音乐电台', icon: 'FM', bgColor: 'linear-gradient(135deg, #EC4141, #FF6666)' },
@@ -181,7 +210,7 @@ const roamModes = ref([
 // 私人fm当前歌曲
 const currentFmSong = ref(null)
 
-// 猶你喜欢的歌曲
+// 猀你喜欢的歌曲
 const guessSongs = ref([])
 
 // 心情
@@ -293,6 +322,27 @@ const onTabChange = (name) => {
   background: #fff;
   border-bottom: 1rpx solid #f0f0f0;
   /* 删除 position: fixed 相关属性 */
+  
+  .nav-left,
+  .nav-right {
+    width: 60rpx;
+    height: 60rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    
+    &:active {
+      background-color: #f0f0f0;
+    }
+    
+    .nav-icon {
+      font-size: 44rpx;
+      color: #333;
+    }
+  }
 }
 
 // 主内容区

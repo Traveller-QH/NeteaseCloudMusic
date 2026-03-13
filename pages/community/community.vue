@@ -125,21 +125,27 @@
 		
 		<!-- 底部导航栏 -->
     <AppTabBar class="app-tabbar" :current-page="'community'" @tabChange="onTabChange" />
+    
+    <!-- 搜索弹窗组件 -->
+    <SearchPopup v-model="showSearchPopup" @search="handleSearch" />
 	</view>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { onBackPress } from '@dcloudio/uni-app'
 import { getHotTopic, getEvent, getHotComment } from '@/utils/api.js'
 import AppTabBar from '@/components/AppTabBar/AppTabBar.vue'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import PlayBar from '@/components/PlayBar/PlayBar.vue'
+import SearchPopup from '@/components/SearchPopup/SearchPopup.vue'
 
 const currentTab = ref('recommend')
-const activeTab = ref(3)  // 云村页面是第4个（索引为3）
+const activeTab = ref(3)  // 云村页面是第 4 个（索引为 3）
 const loading = ref(false)
 const lasttime = ref(-1)
 const showSidebar = ref(false)
+const showSearchPopup = ref(false) // 控制搜索弹窗显示
 
 // 滚动控制
 const scrollTop = ref(0)
@@ -147,6 +153,17 @@ let lastScrollTop = 0
 
 // 添加搜索相关变量
 const searchKey = ref('')
+
+// 处理返回键（使用 uni-app 的 onBackPress）
+onBackPress(() => {
+  if (showSearchPopup.value) {
+    // 如果搜索弹窗显示，关闭弹窗并阻止默认返回
+    showSearchPopup.value = false
+    return true // 阻止默认返回行为
+  }
+  // 返回 false 允许默认返回行为
+  return false
+})
 
 // 打开侧边栏
 const openSidebar = () => {
@@ -158,12 +175,16 @@ const closeSidebar = () => {
   showSidebar.value = false
 }
 
-// 搜索点击处理
+// 搜索点击处理 - 打开搜索弹窗
 const handleSearchClick = () => {
-	// 跳转到搜索页面或显示搜索界面
-	uni.navigateTo({
-		url: '/pages/search/search'
-	})
+  showSearchPopup.value = true
+}
+
+// 处理搜索事件 - 跳转到搜索结果页
+const handleSearch = (keyword) => {
+  uni.navigateTo({
+    url: `/pages/search/result?keyword=${encodeURIComponent(keyword)}`
+  })
 }
 
 // 滚动区域高度
@@ -442,6 +463,27 @@ const onTabChange = (name) => {
   background: #fff;
   border-bottom: 1rpx solid #f0f0f0;
   /* 删除 position: fixed 相关 */
+  
+  .nav-left,
+  .nav-right {
+    width: 60rpx;
+    height: 60rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    
+    &:active {
+      background-color: #f0f0f0;
+    }
+    
+    .nav-icon {
+      font-size: 44rpx;
+      color: #333;
+    }
+  }
 }
 
 // 内容滚动

@@ -16,9 +16,14 @@
 			<!-- 中间标题 -->
 			<view class="nav-title">我的</view>
 			
-			<!-- 右侧扫码按钮 -->
-			<view class="nav-right" @click="() => {}">
-				<i class="iconfont icon-saoma nav-icon" />
+			<!-- 右侧搜索和扫码按钮 -->
+			<view class="nav-right-group">
+				<view class="nav-right search-btn" @click="handleSearchClick">
+					<i class="iconfont icon-sousuo nav-icon" />
+				</view>
+				<view class="nav-right" @click="() => {}">
+					<i class="iconfont icon-saoma nav-icon" />
+				</view>
 			</view>
 		</view>
 		
@@ -198,26 +203,43 @@
 		
 		<!-- 底部导航栏 -->
     <AppTabBar class="app-tabbar" :current-page="'my'" @tabChange="onTabChange" />
+    
+    <!-- 搜索弹窗组件 -->
+    <SearchPopup v-model="showSearchPopup" @search="handleSearch" />
 	</view>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { onBackPress } from '@dcloudio/uni-app'
 import { onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '@/utils/userStore.js'
 import { getUserDetail } from '@/utils/api.js'
 import AppTabBar from '@/components/AppTabBar/AppTabBar.vue'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import PlayBar from '@/components/PlayBar/PlayBar.vue'
+import SearchPopup from '@/components/SearchPopup/SearchPopup.vue'
 
 const userStore = useUserStore()
 
 const showSidebar = ref(false)
 const showCreated = ref(false)
 const showCollected = ref(false)
+const showSearchPopup = ref(false) // 控制搜索弹窗显示
 
 // 滚动控制
 const scrollTop = ref(0)
+
+// 处理返回键（使用 uni-app 的 onBackPress）
+onBackPress(() => {
+  if (showSearchPopup.value) {
+    // 如果搜索弹窗显示，关闭弹窗并阻止默认返回
+    showSearchPopup.value = false
+    return true // 阻止默认返回行为
+  }
+  // 返回 false 允许默认返回行为
+  return false
+})
 
 // 处理滚动事件（仅用于记录滚动位置，不干预滚动行为）
 const onScroll = (e) => {
@@ -343,6 +365,18 @@ const handleLogin = () => {
 	}
 }
 
+// 搜索点击处理 - 打开搜索弹窗
+const handleSearchClick = () => {
+  showSearchPopup.value = true
+}
+
+// 处理搜索事件 - 跳转到搜索结果页
+const handleSearch = (keyword) => {
+  uni.navigateTo({
+    url: `/pages/search/result?keyword=${encodeURIComponent(keyword)}`
+  })
+}
+
 // 初始化数据
 const initData = async () => {
 	// console.log('我的页面 - 当前登录状态:', userStore.isLogin, 'userId:', userStore.userInfo.userId)
@@ -447,6 +481,55 @@ const onTabChange = (name) => {
   padding: 0 24rpx;
   background: #fff;
   border-bottom: 1rpx solid #f0f0f0;
+  
+  .nav-left {
+    width: 60rpx;
+    height: 60rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    
+    &:active {
+      background-color: #f0f0f0;
+    }
+    
+    .nav-icon {
+      font-size: 44rpx;
+      color: #333;
+    }
+  }
+  
+  .nav-right-group {
+    display: flex;
+    align-items: center;
+    
+    .nav-right {
+      width: 60rpx;
+      height: 60rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+      
+      &.search-btn {
+        margin-right: 8rpx;
+      }
+      
+      &:active {
+        background-color: #f0f0f0;
+      }
+      
+      .nav-icon {
+        font-size: 44rpx;
+        color: #333;
+      }
+    }
+  }
 }
 
 // 顶部操作栏
