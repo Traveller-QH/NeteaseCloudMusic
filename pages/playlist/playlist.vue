@@ -307,11 +307,11 @@ const handlePlaySong = async (song) => {
     try {
       await preloadData.loadAllPromise
       // 加载完成后，更新播放列表 (用户可能已经在听歌了)
+      // 使用 preserveCurrentPlay=true 保留当前播放进度
       const updatedPreloadData = musicStore.getPreloadData()
       const songIndex = updatedPreloadData.songs.findIndex(s => String(s.id) === String(song.id))
       if (songIndex >= 0) {
-        musicStore.setPlaylist(updatedPreloadData.songs, song.id)
-        musicStore.playFromPlaylist(songIndex)
+        musicStore.setPlaylist(updatedPreloadData.songs, song.id, true)
       }
     } catch (error) {
       console.error('后台加载全部歌曲失败:', error)
@@ -353,11 +353,11 @@ const handlePlaySong = async (song) => {
     })
     
     // 加载完成后，更新播放列表
+    // 使用 preserveCurrentPlay=true 保留当前播放进度
     const updatedPreloadData = musicStore.getPreloadData()
     const songIndex = updatedPreloadData.songs.findIndex(s => String(s.id) === String(song.id))
     if (songIndex >= 0) {
-      musicStore.setPlaylist(updatedPreloadData.songs, song.id)
-      musicStore.playFromPlaylist(songIndex)
+      musicStore.setPlaylist(updatedPreloadData.songs, song.id, true)
     }
   } catch (error) {
     console.error('后台加载全部歌曲失败:', error)

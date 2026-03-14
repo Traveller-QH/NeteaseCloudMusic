@@ -683,10 +683,21 @@ const setProgress = (percent) => {
 }
 
 // 设置播放列表
-const setPlaylist = (songs, currentSongId = null) => {
+const setPlaylist = (songs, currentSongId = null, preserveCurrentPlay = false) => {
 	if (!songs || !Array.isArray(songs) || songs.length === 0) {
 		console.warn('播放列表不能为空')
 		return false
+	}
+	
+	// 如果需要保留当前播放状态
+	let shouldResumePlay = false
+	let resumeTime = 0
+	let resumePlaying = false
+	
+	if (preserveCurrentPlay && state.currentSong) {
+		shouldResumePlay = true
+		resumeTime = state.currentTime
+		resumePlaying = state.isPlaying
 	}
 	
 	state.playlist = songs
@@ -705,8 +716,28 @@ const setPlaylist = (songs, currentSongId = null) => {
 		state.playlistIndex = 0
 	}
 	
-	// 清空播放历史
-	state.playHistory = []
+	// 清空播放历史（如果是保留当前播放状态，则不清空）
+	if (!preserveCurrentPlay) {
+		state.playHistory = []
+	}
+	
+	// 如果需要保留当前播放状态，恢复播放进度
+	if (shouldResumePlay && state.currentSong) {
+		// 确保当前歌曲在播放列表中
+		const currentIndex = state.playlist.findIndex(s => String(s.id) === String(state.currentSong.id))
+		if (currentIndex !== -1) {
+			state.playlistIndex = currentIndex
+		}
+		
+		// 恢复播放进度
+		setTimeout(() => {
+			AudioPlayerManager.seek(resumeTime)
+			// 如果之前在播放，继续播放
+			if (resumePlaying) {
+				AudioPlayerManager.resume()
+			}
+		}, 100)
+	}
 	
 	return true
 }
