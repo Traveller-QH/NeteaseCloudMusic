@@ -9,11 +9,12 @@ let currentPlayId = 0
 
 // 预加载的歌曲列表数据 (用于存储完整的歌单信息，支持懒加载)
 const preloadPlaylistData = {
-	playlistId: null, // 歌单ID
+	playlistId: null, // 歌单 ID
 	totalCount: 0,    // 总歌曲数
 	songs: [],        // 已加载的歌曲
 	hasMore: false,   // 是否还有更多歌曲
-	loadAllPromise: null // 加载全部歌曲的 Promise
+	loadAllPromise: null, // 加载全部歌曲的 Promise
+	isLoadingAll: false // 是否正在加载全部歌曲
 }
 
 // 音频播放器管理器
@@ -889,6 +890,92 @@ const resetPreloadData = () => {
 	preloadPlaylistData.songs = []
 	preloadPlaylistData.hasMore = false
 	preloadPlaylistData.loadAllPromise = null
+	preloadPlaylistData.isLoadingAll = false
+}
+
+// 全量加载歌单歌曲 (后台静默加载，用于生成完整播放列表)
+const loadAllSongsForPlaylist = async (playlistId, fetchFunction, options = {}) => {
+	const {
+		pageSize = 100,        // 每页数量
+		maxSongs = 1000,       // 最大拉取数量
+		delayMs = 50,          // 请求间隔 (避免限流)
+		onProgress = null      // 进度回调函数
+	} = options
+	
+	// 如果已经在加载中，返回 Promise
+	if (preloadPlaylistData.isLoadingAll && preloadPlaylistData.loadAllPromise) {
+		return preloadPlaylistData.loadAllPromise
+	}
+	
+	// 如果是同一个歌单且已加载完成，直接返回
+	if (preloadPlaylistData.playlistId === playlistId && 
+	    !preloadPlaylistData.hasMore && 
+	    preloadPlaylistData.songs.length > 0) {
+		return Promise.resolve(preloadPlaylistData.songs)
+	}
+	
+	// 如果是不同的歌单，清空之前的数据
+	if (preloadPlaylistData.playlistId !== playlistId) {
+		preloadPlaylistData.songs = []
+		preloadPlaylistData.hasMore = true
+		preloadPlaylistData.totalCount = 0
+	}
+	
+	// 创建加载任务
+	preloadPlaylistData.isLoadingAll = true
+	preloadPlaylistData.playlistId = playlistId
+	
+	const loadAllTask = (async () => {
+		try {
+			// 先获取第一页
+			let offset = 0
+			let hasMore = true
+			let loadedCount = 0
+			
+			while (hasMore && loadedCount < maxSongs) {
+				const res = await fetchFunction(pageSize, offset)
+				
+				if (res.code === 200 && res.songs) {
+					const newSongs = res.songs
+					
+					// 追加到预加载数据
+					preloadPlaylistData.songs.push(...newSongs)
+					loadedCount += newSongs.length
+					offset += newSongs.length
+					
+					// 通知进度
+					if (onProgress) {
+						onProgress({
+							loaded: loadedCount,
+							total: res.total || 0,
+							hasMore: newSongs.length >= pageSize
+						})
+					}
+					
+					// 判断是否还有更多
+					hasMore = newSongs.length >= pageSize
+					preloadPlaylistData.hasMore = hasMore
+					
+					// 如果有更多，延迟后继续加载
+					if (hasMore && loadedCount < maxSongs) {
+						await new Promise(resolve => setTimeout(resolve, delayMs))
+					}
+				} else {
+					hasMore = false
+				}
+			}
+			
+			preloadPlaylistData.isLoadingAll = false
+			return preloadPlaylistData.songs
+		} catch (error) {
+			console.error('全量加载歌曲失败:', error)
+			preloadPlaylistData.isLoadingAll = false
+			throw error
+		}
+	})()
+	
+	preloadPlaylistData.loadAllPromise = loadAllTask
+	return loadAllTask
 }
 
 // 导出
@@ -927,7 +1014,8 @@ export const useMusicStore = () => {
 		togglePlayMode,
 		getPreloadData,
 		setPreloadData,
-		resetPreloadData
+		resetPreloadData,
+		loadAllSongsForPlaylist // 全量加载歌曲
 	}
 }
 

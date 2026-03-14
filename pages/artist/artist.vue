@@ -864,33 +864,97 @@ const toggleVideoSort = () => {
 }
 
 // 播放歌曲
-const playSong = (song) => {
-  // 根据当前所在分类使用不同的歌曲列表
-  let songs = []
-  
-  if (activeTab.value === 'songs') {
-    // 主页分类 - 歌曲列表，使用全部歌曲
-    songs = allSongs.value
-  } else if (activeTab.value === 'home') {
-    // 主页分类 - TA 的热门作品，使用热门歌曲列表
-    songs = hotSongs.value
+const playSong = async (song) => {
+  // 如果当前在"TA 的热门作品"分类，直接使用热门歌曲列表
+  if (activeTab.value === 'home') {
+    const songIndex = hotSongs.value.findIndex(s => String(s.id) === String(song.id))
+    if (songIndex >= 0 && hotSongs.value.length > 0) {
+      musicStore.setPlaylist(hotSongs.value, song.id)
+      musicStore.playFromPlaylist(songIndex)
+      
+      uni.navigateTo({
+        url: `/pages/player/player?id=${song.id}`
+      })
+      return
+    }
   }
   
-  // 在列表中查找当前歌曲
-  const songIndex = songs.findIndex(s => String(s.id) === String(song.id))
+  // 如果在"单曲"分类或没有其他数据，使用全量加载逻辑
+  const preloadData = musicStore.getPreloadData()
   
-  if (songs.length > 0 && songIndex >= 0) {
-    // 找到了歌曲，使用整个列表替换播放列表
-    musicStore.setPlaylist(songs, song.id)
-    musicStore.playFromPlaylist(songIndex)
-  } else {
-    // 如果找不到，只播放这一首
+  // 如果已经有预加载数据且已加载完成，直接使用
+  if (preloadData.playlistId === artistId.value && 
+      preloadData.songs.length > 0 && 
+      !preloadData.hasMore) {
+    const songIndex = preloadData.songs.findIndex(s => String(s.id) === String(song.id))
+    musicStore.setPlaylist(preloadData.songs, song.id)
+    musicStore.playFromPlaylist(songIndex >= 0 ? songIndex : 0)
+    
+    uni.navigateTo({
+      url: `/pages/player/player?id=${song.id}`
+    })
+    return
+  }
+  
+  // 如果正在加载中，先跳转播放，加载会在后台继续
+  if (preloadData.isLoadingAll && preloadData.loadAllPromise) {
+    // 不显示 loading，直接跳转播放当前歌曲
     musicStore.addToPlaylist(song)
+    uni.navigateTo({
+      url: `/pages/player/player?id=${song.id}`
+    })
+    
+    // 在后台等待加载完成，然后更新播放列表
+    try {
+      await preloadData.loadAllPromise
+      // 加载完成后，更新播放列表 (用户可能已经在听歌了)
+      const updatedPreloadData = musicStore.getPreloadData()
+      const songIndex = updatedPreloadData.songs.findIndex(s => String(s.id) === String(song.id))
+      if (songIndex >= 0) {
+        musicStore.setPlaylist(updatedPreloadData.songs, song.id)
+        musicStore.playFromPlaylist(songIndex)
+      }
+    } catch (error) {
+      console.error('后台加载全部歌曲失败:', error)
+      // 后台加载失败不影响当前播放
+    }
+    return
   }
   
+  // 没有预加载数据或未完成，先跳转播放，同时在后台加载
+  // 先添加当前歌曲到播放列表
+  musicStore.addToPlaylist(song)
+  
+  // 立即跳转播放
   uni.navigateTo({
     url: `/pages/player/player?id=${song.id}`
   })
+  
+  // 在后台开始全量加载 (不阻塞 UI)
+  try {
+    await musicStore.loadAllSongsForPlaylist(artistId.value, async (size, offset) => {
+      return await getArtistSongs(artistId.value, 'hot', size, offset)
+    }, {
+      pageSize: 100,
+      maxSongs: 1000,
+      delayMs: 50,
+      onProgress: (progress) => {
+        // 后台加载不显示进度提示，避免干扰用户
+        console.log(`后台加载进度：${progress.loaded}/${progress.total || '?'}`)
+      }
+    })
+    
+    // 加载完成后，更新播放列表
+    const updatedPreloadData = musicStore.getPreloadData()
+    const songIndex = updatedPreloadData.songs.findIndex(s => String(s.id) === String(song.id))
+    if (songIndex >= 0) {
+      musicStore.setPlaylist(updatedPreloadData.songs, song.id)
+      musicStore.playFromPlaylist(songIndex)
+    }
+  } catch (error) {
+    console.error('后台加载全部歌曲失败:', error)
+    // 后台加载失败不影响当前播放
+  }
 }
 
 // 跳转到专辑
