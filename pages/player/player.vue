@@ -274,8 +274,8 @@ const updateRotation = () => {
 	const deltaTime = (now - lastUpdateTime.value) / 1000 // 转换为秒
 	lastUpdateTime.value = now
 	
-	// 每秒旋转 18 度（20 秒一圈）
-	discRotation.value = (discRotation.value + deltaTime * 18) % 360
+	// 每秒旋转 18 度（20 秒一圈），角度持续累加，不取模
+	discRotation.value += deltaTime * 18
 	
 	// 使用 setTimeout 模拟 requestAnimationFrame（兼容性更好）
 	timerId.value = setTimeout(updateRotation, 16) // 约 60fps
