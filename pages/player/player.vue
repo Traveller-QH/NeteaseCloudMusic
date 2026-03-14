@@ -244,6 +244,13 @@
 import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import { useMusicStore } from '@/utils/musicStore.js'
 
+defineProps({
+  id: {
+    type: [String, Number],
+    default: ''
+  }
+})
+
 const musicStore = useMusicStore()
 
 // 旋转动画相关
