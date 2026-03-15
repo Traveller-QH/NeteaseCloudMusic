@@ -213,12 +213,39 @@ const qualityLevels = [
 	{ level: 'higher', name: '较高 High', icon: 'HI', description: '较标准音质更丰富的细节体验，最高 192kbps' },
 	{ level: 'exhigh', name: '极高 HQ', icon: 'HQ', description: '近 CD 音质的细节体验，最高 320kbps' },
 	{ level: 'lossless', name: '无损 SQ', icon: 'SQ', description: '高保真无损音质，最高 48kHz/16bit' },
-	{ level: 'hires', name: '高解析度无损 Hi-Res', icon: 'H', description: '更饱满清晰的高解析度音质，最高 192kHz/24bit' },
+	{ level: 'hires', name: '高解析度无损 Hi-Res', icon: 'H', description: '更饱满清晰的高解析度音质，192kHz/24bit' },
 	{ level: 'jyeffect', name: '高清臻音 Spatial Audio', icon: 'SP', description: '高频细节还原与清晰沉浸感，96kHz/24bit' },
 	{ level: 'sky', name: '沉浸环绕音 Surround Sound', icon: 'SU', description: '环绕音感 最高 5.1 声道' },
 	{ level: 'dolby', name: '杜比全景音 Dolby Atmos', icon: 'DA', description: '沉浸三维空间音频，最高 7.1.4 声道' },
 	{ level: 'jymaster', name: '超清母带 Master', icon: 'M', description: '极致细节 192kHz/24bit' }
 ]
+
+// 全局音质设置（持久化存储）
+const GLOBAL_QUALITY_KEY = 'netease_music_global_quality'
+
+// 获取全局音质设置
+const getGlobalQuality = () => {
+	// 优先使用本地存储的设置，如果没有则使用默认值
+	try {
+		const saved = uni.getStorageSync(GLOBAL_QUALITY_KEY)
+		if (saved && qualityLevels.some(q => q.level === saved)) {
+			return saved
+		}
+	} catch (error) {
+		console.warn('读取全局音质设置失败:', error)
+	}
+	return 'standard' // 默认标准音质
+}
+
+// 保存全局音质设置
+const saveGlobalQuality = (level) => {
+	try {
+		uni.setStorageSync(GLOBAL_QUALITY_KEY, level)
+		console.log('全局音质设置已保存:', level)
+	} catch (error) {
+		console.error('保存全局音质设置失败:', error)
+	}
+}
 
 // 全局音乐状态
 const state = reactive({
@@ -247,7 +274,7 @@ const state = reactive({
 	// 歌曲是否被喜欢
 	isLiked: false,
 	// 当前音质等级
-	currentQuality: 'standard',
+	currentQuality: getGlobalQuality(), // 初始化时使用全局设置
 	// 可用音质列表
 	availableQualities: [],
 	// 播放列表
@@ -377,8 +404,8 @@ const playSongById = async (id) => {
 		// 检查喜欢状态
 		checkLikeStatus(id)
 		
-		// 获取播放地址
-		const urlRes = await getSongUrl(id, 'standard')
+		// 获取播放地址（使用全局音质设置）
+		const urlRes = await getSongUrl(id, state.currentQuality)
 		
 		// 再次检查是否是最新的请求
 		if (requestId !== currentPlayId) {
@@ -437,7 +464,7 @@ const generateAvailableQualities = (maxLevel) => {
 	state.availableQualities = qualityLevels.slice(0, maxIndex + 1).reverse()
 }
 
-// 切换音质
+// 切换音质（用于当前歌曲）
 const switchQuality = async (newLevel) => {
 	if (!state.currentSong?.id || newLevel === state.currentQuality) return
 	
@@ -475,6 +502,77 @@ const switchQuality = async (newLevel) => {
 		state.loading = false
 		return false
 	}
+}
+
+// 切换全局音质（用于侧边栏设置）
+const switchGlobalQuality = async (newLevel) => {
+	if (newLevel === state.currentQuality) {
+		// 如果切换的是当前音质，直接保存设置
+		saveGlobalQuality(newLevel)
+		return true
+	}
+	
+	// 保存全局设置
+	saveGlobalQuality(newLevel)
+	
+	// 如果当前有歌曲正在播放，重新获取播放地址
+	if (state.currentSong?.id && state.songUrl) {
+		try {
+			state.loading = true
+			
+			// 根据歌曲的最高音质调整实际使用的音质
+			let actualLevel = newLevel
+			
+			// 检查当前歌曲是否支持选择的音质
+			if (state.availableQualities.length > 0) {
+				const highestQuality = state.availableQualities[0]?.level // 最高音质在第一个
+				const qualityIndex = qualityLevels.findIndex(q => q.level === newLevel)
+				const highestIndex = qualityLevels.findIndex(q => q.level === highestQuality)
+				
+				// 如果选择的音质高于歌曲最高音质，则降级到歌曲最高音质
+				if (qualityIndex > highestIndex) {
+					actualLevel = highestQuality
+					console.log(`音质降级：${newLevel} -> ${actualLevel}（歌曲最高音质）`)
+				}
+			}
+			
+			// 获取新音质的 URL
+			const urlRes = await getSongUrl(state.currentSong.id, actualLevel)
+			
+			if (urlRes.code === 200 && urlRes.data && urlRes.data.length > 0) {
+				const url = urlRes.data[0].url
+				if (url) {
+					// 保存当前播放进度
+					const currentTime = state.currentTime
+					const wasPlaying = state.isPlaying
+					
+					// 更新音质和 URL
+					state.currentQuality = actualLevel
+					state.songUrl = url
+					
+					// 如果之前正在播放，重新播放
+					if (wasPlaying) {
+						await AudioPlayerManager.safePlay(url)
+						AudioPlayerManager.seek(currentTime)
+					}
+					
+					state.loading = false
+					return true
+				}
+			}
+			
+			state.loading = false
+			return false
+		} catch (error) {
+			console.error('切换全局音质失败:', error)
+			state.loading = false
+			return false
+		}
+	}
+	
+	// 如果没有歌曲在播放，只需更新当前音质设置
+	state.currentQuality = newLevel
+	return true
 }
 
 // 获取评论数量
@@ -1030,6 +1128,7 @@ export const useMusicStore = () => {
 		setProgress,
 		toggleLike,
 		switchQuality,
+		switchGlobalQuality,
 		getQualityName,
 		getQualityIcon,
 		getQualityDescription,
