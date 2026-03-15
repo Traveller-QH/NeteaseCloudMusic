@@ -52,7 +52,7 @@
           <view class="history-header">
             <text class="history-title">搜索历史</text>
             <view class="clear-history" @click="clearSearchHistory">
-              <i class="iconfont icon-lajitong clear-icon" />
+              <i class="iconfont icon-shanchu clear-icon" />
             </view>
           </view>
           
