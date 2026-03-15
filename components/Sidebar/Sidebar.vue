@@ -9,27 +9,31 @@
 			<text class="sidebar-title">网易云音乐</text>
 		</view>
 		<view class="sidebar-menu">
-			<view class="menu-item">
+      <!--<view class="menu-item">
         <i class="iconfont icon-shezhi" />
-				<text class="menu-text">设置</text>
-			</view>
-			<view class="menu-item">
+        <text class="menu-text">设置</text>
+      </view>
+      <view class="menu-item">
         <i class="iconfont icon-shensemoshi" />
-				<text class="menu-text">深色模式</text>
-				<up-switch size="20" activeColor="#EC4141"></up-switch>
-			</view>
-			<view class="menu-item">
+        <text class="menu-text">深色模式</text>
+        <up-switch size="20" activeColor="#EC4141"></up-switch>
+      </view>
+      <view class="menu-item">
         <i class="iconfont icon-xiaoxi" />
-				<text class="menu-text">消息中心</text>
-			</view>
+        <text class="menu-text">消息中心</text>
+      </view>-->
+      <view class="menu-item">
+        <i class="iconfont icon-zengqiangduijiangyinzhi" />
+        <text class="menu-text">全局音质</text>
+      </view>
 			<view class="menu-item">
         <i class="iconfont icon-dingshiguanbi" />
 				<text class="menu-text">定时关闭</text>
 			</view>
-			<view class="menu-item">
+      <!--<view class="menu-item">
         <i class="iconfont icon-jiashimoshi" />
-				<text class="menu-text">驾驶模式</text>
-			</view>
+        <text class="menu-text">驾驶模式</text>
+      </view>-->
 		</view>
 		<view class="sidebar-footer">
 			<view class="footer-item">
