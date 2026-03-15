@@ -48,7 +48,7 @@
         v-else
       >
         <!-- 搜索历史 -->
-        <view class="search-history" v-if="searchHistory.length > 0">
+        <view class="search-history">
           <view class="history-header">
             <text class="history-title">搜索历史</text>
             <view class="clear-history" @click="clearSearchHistory">
