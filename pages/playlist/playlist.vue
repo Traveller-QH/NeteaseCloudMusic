@@ -34,7 +34,8 @@
       <view class="play-all" @click="handlePlayAll">
         <i class="iconfont icon-bofang1 play-icon"/>
         <text class="text">播放全部</text>
-        <text class="count">({{ songList.length }}{{ pageType === 'album' ? '首' : '首' }})</text>
+        <!--<text class="count">({{ songList.length }}{{ pageType === 'album' ? '首' : '首' }})</text>-->
+        <text class="count">({{ playlistTrackCount }}首)</text>
       </view>
     </view>
 
@@ -99,6 +100,8 @@ const musicStore = useMusicStore()
 
 // 歌单ID
 const playlistId = ref('')
+// 歌单歌曲数量
+const playlistTrackCount = ref(0)
 // 页面类型：playlist(歌单) | album(专辑) | radio(播客)
 const pageType = ref('playlist')
 // 歌单/专辑信息
@@ -451,6 +454,10 @@ onMounted(async () => {
     preloadData.totalCount = totalSongs.value
     preloadData.songs = []
     preloadData.hasMore = hasMore.value
+  }
+
+  if (options.trackCount) {
+    playlistTrackCount.value = options.trackCount
   }
 })
 </script>

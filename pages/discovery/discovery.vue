@@ -75,7 +75,7 @@
               class="playlist-item"
               v-for="(item, index) in playlists"
               :key="item.id"
-              @click="goPlaylistDetail(item.id)"
+              @click="goPlaylistDetail(item.id, item.trackCount)"
           >
             <view class="playlist-cover">
               <image class="cover-img" :src="item.picUrl" mode="aspectFill" />
@@ -324,10 +324,10 @@ const handleBannerClick = (item) => {
 }
 
 // 跳转歌单详情
-const goPlaylistDetail = (id) => {
+const goPlaylistDetail = (id, trackCount) => {
   if (id) {
     uni.navigateTo({
-      url: `/pages/playlist/playlist?id=${id}`
+      url: `/pages/playlist/playlist?id=${id}&trackCount=${trackCount}`
     })
   }
 }

@@ -111,7 +111,7 @@
 						</view>
 					</view>
 					<!-- 真实歌单列表 -->
-					<view class="playlist-item" v-for="(playlist, index) in createdPlaylists" :key="playlist?.id" @click="goToPlaylist(playlist?.id)">
+					<view class="playlist-item" v-for="(playlist, index) in createdPlaylists" :key="playlist?.id" @click="goToPlaylist(playlist?.id, playlist?.trackCount)">
 						<view class="playlist-cover" :class="{ 'like-cover': index === 0 }">
 							<image v-if="playlist?.coverImgUrl" :src="playlist?.coverImgUrl" mode="aspectFill" class="cover-img"></image>
 							<i v-else-if="index === 0" class="iconfont icon-woxihuande_on like-icon" />
@@ -144,7 +144,7 @@
 					<text class="empty-text">暂无收藏的歌单</text>
 				</view>
 				<view class="playlist-list" v-show="showCollected && collectedPlaylists?.length">
-					<view class="playlist-item" v-for="playlist in collectedPlaylists" :key="playlist?.id" @click="goToPlaylist(playlist?.id)">
+					<view class="playlist-item" v-for="playlist in collectedPlaylists" :key="playlist?.id" @click="goToPlaylist(playlist?.id, playlist?.trackCount)">
 						<view class="playlist-cover">
 							<image v-if="playlist?.coverImgUrl" :src="playlist?.coverImgUrl" mode="aspectFill" class="cover-img"></image>
 						</view>
@@ -359,11 +359,11 @@ const playSong = (song) => {
 }
 
 // 跳转到歌单页面
-const goToPlaylist = (playlistId) => {
+const goToPlaylist = (playlistId, playlistTrackCount) => {
 	if (!playlistId) return
 	
 	uni.navigateTo({
-		url: `/pages/playlist/playlist?id=${playlistId}`
+		url: `/pages/playlist/playlist?id=${playlistId}&trackCount=${playlistTrackCount}`
 	})
 }
 
