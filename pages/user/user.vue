@@ -347,7 +347,7 @@ const handleLoadMore = () => {
 // 跳转到歌单详情页
 const goToPlaylist = (playlist) => {
   uni.navigateTo({
-    url: `/pages/playlist/playlist?id=${playlist.id}`
+    url: `/pages/playlist/playlist?id=${playlist.id}&trackCount=${playlist.trackCount}`
   })
 }
 
