@@ -6,6 +6,34 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "6003702",
+      "name": "密码可见",
+      "font_class": "mimakejian1",
+      "unicode": "e624",
+      "unicode_decimal": 58916
+    },
+    {
+      "icon_id": "6235315",
+      "name": "密码不可见",
+      "font_class": "mimabukejian1",
+      "unicode": "e625",
+      "unicode_decimal": 58917
+    },
+    {
+      "icon_id": "7461488",
+      "name": "密码不可见",
+      "font_class": "mimabukejian",
+      "unicode": "e637",
+      "unicode_decimal": 58935
+    },
+    {
+      "icon_id": "7461491",
+      "name": "密码可见",
+      "font_class": "mimakejian",
+      "unicode": "e638",
+      "unicode_decimal": 58936
+    },
+    {
       "icon_id": "14925267",
       "name": "退出登录",
       "font_class": "0tuichudenglu-05",

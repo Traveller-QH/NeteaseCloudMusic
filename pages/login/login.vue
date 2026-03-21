@@ -71,7 +71,7 @@
 						placeholder="请输入密码"
 					/>
 					<view class="input-icon" @click="togglePassword">
-						<i class="iconfont" :class="showPassword ? 'icon-yanjing' : 'icon-yanjing1'"></i>
+						<i class="iconfont" :class="showPassword ? 'icon-mimakejian1' : 'icon-mimabukejian1'"></i>
 					</view>
 				</view>
 						
