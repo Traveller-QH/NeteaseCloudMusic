@@ -92,13 +92,26 @@ const musicStore = useMusicStore()
 // 本地歌曲列表直接从store获取（computed会自动响应变化）
 const localSongs = computed(() => musicStore.getAllLocalSongs())
 
-// 计算总大小（简单估算，每首歌约5MB）
+// 计算总大小（累加所有歌曲的实际文件大小）
 const totalSizeStr = computed(() => {
-  const totalMB = localSongs.value.length * 5
-  if (totalMB < 1024) {
+  if (localSongs.value.length === 0) return '0MB'
+  
+  // 累加所有歌曲的大小（单位为字节）
+  const totalBytes = localSongs.value.reduce((sum, song) => {
+    // 如果有 size 字段且大于 0，使用实际大小；否则估算为 10MB
+    const songSize = (song.size && song.size > 0) ? song.size : (10 * 1024 * 1024)
+    return sum + songSize
+  }, 0)
+  
+  // 转换为 MB 或 GB
+  if (totalBytes < 1024 * 1024 * 1024) {
+    // 小于 1GB，显示 MB
+    const totalMB = (totalBytes / (1024 * 1024)).toFixed(1)
     return `${totalMB}MB`
   } else {
-    return `${(totalMB / 1024).toFixed(1)}GB`
+    // 大于等于 1GB，显示 GB
+    const totalGB = (totalBytes / (1024 * 1024 * 1024)).toFixed(2)
+    return `${totalGB}GB`
   }
 })
 

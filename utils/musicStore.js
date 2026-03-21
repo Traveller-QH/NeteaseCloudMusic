@@ -1167,14 +1167,27 @@ const downloadSong = async (song) => {
 				saveName: fileName,
 				success: (path) => {
 					// 保存成功，path 为最终文件路径
+					// #ifdef APP-PLUS
+					// 获取文件大小
+					let fileSize = 0;
+					try {
+						const fs = uni.getFileSystemManager();
+						const stats = fs.getFileInfo(path);
+						if (stats && stats.size) {
+							fileSize = stats.size; // 单位为字节
+						}
+					} catch (error) {
+						console.error('获取文件大小失败:', error);
+					}
+					// #endif
+					
 					const localSongInfo = {
 						id: song.id,
 						name: song.name,
 						artists: artists,
 						album: song.al || song.album,
 						localPath: path,
-						// 文件大小可以通过其他方式获取，这里先置为 0 或从响应头读取（可选）
-						size: 0,
+						size: fileSize, // 保存实际文件大小（字节）
 						downloadTime: Date.now()
 					};
 
