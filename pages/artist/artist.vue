@@ -940,7 +940,7 @@ const playSong = async (song) => {
       delayMs: 50,
       onProgress: (progress) => {
         // 后台加载不显示进度提示，避免干扰用户
-        console.log(`后台加载进度：${progress.loaded}/${progress.total || '?'}`)
+        // console.log(`后台加载进度：${progress.loaded}/${progress.total || '?'}`)
       }
     })
     

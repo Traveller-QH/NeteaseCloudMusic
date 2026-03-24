@@ -8,38 +8,23 @@
  * @param {String} filePath - 文件路径
  * @returns {Promise<String>} - MD5 值
  */
-export const calculateFileMD5 = async (filePath) => {
-	// #ifdef APP-PLUS
-	try {
-		const plusModule = plus;
-		
-		// 检查是否支持 crypto 模块
-		if (!plusModule.crypto || !plusModule.crypto.Digest) {
-			console.warn('当前设备不支持 crypto.Digest');
-			return ''; // 返回空字符串，不影响匹配
-		}
-		
-		// 创建 Digest 对象计算 MD5
-		const digest = new plusModule.crypto.Digest('md5');
-		const fileData = plusModule.io.readFile(filePath);
-		
-		if (fileData) {
-			const md5 = digest.update(fileData).digest('hex');
-			return md5;
-		} else {
-			console.warn('无法读取文件');
-			return '';
-		}
-	} catch (error) {
-		console.error('计算 MD5 失败:', error);
-		return ''; // 出错时返回空字符串，不阻断流程
-	}
-	// #endif
-	
-	// #ifndef APP-PLUS
-	console.warn('H5 端不支持 MD5 计算');
-	return '';
-	// #endif
+export const calculateFileMD5 = (filePath) => {
+	return new Promise((resolve, reject) => {
+		uni.getFileInfo({
+			filePath,
+			digestAlgorithm: 'md5',
+			success: (res) => {
+				// console.log('获取文件信息成功:', res);
+				// console.log('文件大小：', res.size);
+				// console.log('文件MD5：', res.digest);
+				resolve(res.digest);
+			},
+			fail: (err) => {
+				// console.error('获取文件信息失败:', err);
+				reject(err);
+			}
+		});
+	});
 };
 
 /**
@@ -138,20 +123,20 @@ function doQuery(resolve, reject) {
 	try {
 		// 获取当前的 Activity（应用的主活动）
 		const mainActivity = plus.android.runtimeMainActivity();
-		console.log('获取 mainActivity 成功:', mainActivity);
+		// console.log('获取 mainActivity 成功:', mainActivity);
 
 		// 获取 ContentResolver
 		const contentResolver = mainActivity.getContentResolver();
-		console.log('获取 contentResolver 成功:', contentResolver);
+		// console.log('获取 contentResolver 成功:', contentResolver);
 
 		// 导入 MediaStore 类
 		const MediaStore = plus.android.importClass('android.provider.MediaStore');
 		const AudioMedia = MediaStore.Audio.Media;
-		console.log('导入 MediaStore 成功');
+		// console.log('导入 MediaStore 成功');
 
 		// 构建查询 URI（外部存储的音频）
 		const uri = AudioMedia.EXTERNAL_CONTENT_URI;
-		console.log('获取 URI 成功:', uri);
+		// console.log('获取 URI 成功:', uri);
 
 		// 需要查询的字段（使用 MediaStore 的常量）
 		const projection = [
@@ -164,18 +149,18 @@ function doQuery(resolve, reject) {
 			AudioMedia.SIZE,
 			AudioMedia.DATE_MODIFIED
 		];
-		console.log('projection 数组:', projection);
+		// console.log('projection 数组:', projection);
 
 		// 查询条件：只选择音乐文件
 		const selection = AudioMedia.IS_MUSIC + " != 0";
-		console.log('selection:', selection);
+		// console.log('selection:', selection);
 
 		// 排序：按标题排序
 		const sortOrder = AudioMedia.TITLE + " ASC";
-		console.log('sortOrder:', sortOrder);
+		// console.log('sortOrder:', sortOrder);
 
 		// 执行查询 - 使用 invoke 方法调用
-		console.log('准备调用 query 方法...');
+		// console.log('准备调用 query 方法...');
 		const cursor = plus.android.invoke(
 			contentResolver,
 			'query',
@@ -185,7 +170,7 @@ function doQuery(resolve, reject) {
 			null,
 			sortOrder
 		);
-		console.log('query 调用成功，cursor:', cursor);
+		// console.log('query 调用成功，cursor:', cursor);
 
 		const musicList = [];
 
@@ -220,11 +205,11 @@ function doQuery(resolve, reject) {
 			} finally {
 				// 关闭游标 - 使用 invoke 方法
 				plus.android.invoke(cursor, 'close');
-				console.log('cursor 已关闭');
+				// console.log('cursor 已关闭');
 			}
 		}
 
-		console.log(`扫描完成，共找到 ${musicList.length} 首歌曲`);
+		// console.log(`扫描完成，共找到 ${musicList.length} 首歌曲`);
 		resolve(musicList);
 
 	} catch (error) {
@@ -272,37 +257,48 @@ export const matchSongInfo = async (song, matchApi) => {
 		const parsed = parseFileName(fileName);
 		
 		// 如果文件名解析失败，使用元数据
-		const title = parsed.title || song.name || '';
-		const artist = parsed.artist || song.artist || '';
-		
+		let title = parsed.title || song.name || '';
+		let artist = parsed.artist || song.artist || '';
+
+		// 清理无效的歌手名
+		if (artist === '<unknown>' || !artist || artist.trim() === '') {
+			artist = '';
+		}
+
+		// 可选：清理标题中的无效值（如果你的数据中也可能出现）
+		if (title === '<unknown>') {
+			title = '';
+		}
+
 		// 计算文件 MD5
 		let md5 = '';
 		try {
 			md5 = await calculateFileMD5(song.localPath);
-			console.log(`MD5 计算完成：${md5}`);
+			// console.log(`MD5 计算完成：${md5}`);
 		} catch (error) {
 			console.warn(`MD5 计算失败：${song.localPath}`, error);
 		}
 		
 		// 准备匹配参数（不发送 album 参数）
 		const params = {
-			title: title,
-			artist: artist,
+			title: title || '',
+			artist: artist || '',
+			// album: '',
 			duration: parseFloat((song.duration || 0).toFixed(2)), // 保留两位小数
 			md5: md5
 		};
 		
-		console.log(`正在匹配歌曲：${params.title} - ${params.artist}, 时长：${params.duration}s, MD5:${params.md5 || '无'}`);
-		console.log(`请求参数:`, JSON.stringify(params));
+		// console.log(`正在匹配歌曲：${params.title} - ${params.artist}, 时长：${params.duration}s, MD5:${params.md5 || ''}`);
+		// console.log(`请求参数:`, JSON.stringify(params));
 		
 		// 调用匹配接口
 		const result = await matchApi(params);
-		console.log('匹配接口返回:', result);
+		// console.log('匹配接口返回:', result);
 		
 		if (result.code === 200 && result.result && result.result.songs && result.result.songs.length > 0) {
 			// 匹配成功，返回第一首匹配的歌曲
 			const matchedSong = result.result.songs[0];
-			console.log(`匹配成功：${matchedSong.name}`);
+			// console.log(`匹配成功：${matchedSong.name}`);
 			
 			// 合并本地信息和在线信息
 			return {
@@ -316,7 +312,7 @@ export const matchSongInfo = async (song, matchApi) => {
 			};
 		} else {
 			// 匹配失败，保持原有信息
-			console.log(`匹配失败：${params.title}, 原因：`, result);
+			// console.log(`匹配失败：${params.title}, 原因：`, result);
 			return {
 				...song,
 				matchSuccess: false

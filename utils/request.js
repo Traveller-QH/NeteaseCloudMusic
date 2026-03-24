@@ -124,21 +124,23 @@ const request = (options) => {
 
 // GET 请求
 export const get = (url, params = {}) => {
-	// 将参数拼接到 URL 中
-	const queryString = Object.keys(params).map(key => 
-		`${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
-	).join('&')
-	
-	let fullUrl = queryString ? `${url}?${queryString}` : url
-	
-	// console.log('GET 请求完整 URL:', fullUrl)
-	// console.log('参数:', params)
-	
-	return request({
-		url: fullUrl,
-		method: 'GET'
-	})
-}
+	let fullUrl = url;
+
+	if (params._rawQuery !== undefined) {
+		const rawQuery = params._rawQuery;
+		delete params._rawQuery;
+		fullUrl = rawQuery ? `${url}?${rawQuery}` : url;
+	} else {
+		const queryString = Object.keys(params).map(key =>
+			`${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
+		).join('&');
+		fullUrl = queryString ? `${url}?${queryString}` : url;
+	}
+
+	// console.log('GET 请求完整 URL:', fullUrl);
+
+	return request({ url: fullUrl, method: 'GET' });
+};
 
 // POST请求
 export const post = (url, data = {}) => {

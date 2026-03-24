@@ -676,9 +676,31 @@ export const getSongUrlMatch = (id) => {
  * @param {String} params.album - 文件的专辑信息（可选）
  */
 export const searchMatch = (params) => {
-	const { title, artist, duration, md5, album = '' } = params
-	return get('/search/match', { title, artist, duration, md5, album })
-}
+	const { title, artist, duration, md5, album = '' } = params;
+	const parts = [];
+
+	if (title) parts.push(`title=${encodeURIComponent(title)}`);
+	if (album) parts.push(`album=${encodeURIComponent(album)}`);
+
+	// 只有当 artist 有实际内容时才处理
+	if (artist && artist.trim() !== '') {
+		const artists = artist.split('&');
+		if (artists[0]) parts.push(`artist=${encodeURIComponent(artists[0])}`);
+		for (let i = 1; i < artists.length; i++) {
+			const singer = artists[i];
+			if (singer && singer.trim() !== '') {
+				parts.push(`${encodeURIComponent(singer)}=`);
+			}
+		}
+	}
+
+	if (duration) parts.push(`duration=${duration}`);
+	if (md5) parts.push(`md5=${md5}`);
+
+	const rawQuery = parts.join('&');
+	// console.log('手动构建的查询字符串:', rawQuery);
+	return get('/search/match', { _rawQuery: rawQuery });
+};
 
 export default {
 	// 首页

@@ -262,7 +262,7 @@ const getGlobalQuality = () => {
 const saveGlobalQuality = (level) => {
 	try {
 		uni.setStorageSync(GLOBAL_QUALITY_KEY, level)
-		console.log('全局音质设置已保存:', level)
+		// console.log('全局音质设置已保存:', level)
 	} catch (error) {
 		console.error('保存全局音质设置失败:', error)
 	}
@@ -555,7 +555,7 @@ const switchGlobalQuality = async (newLevel) => {
 				// 如果选择的音质高于歌曲最高音质，则降级到歌曲最高音质
 				if (qualityIndex > highestIndex) {
 					actualLevel = highestQuality
-					console.log(`音质降级：${newLevel} -> ${actualLevel}（歌曲最高音质）`)
+					// console.log(`音质降级：${newLevel} -> ${actualLevel}（歌曲最高音质）`)
 				}
 			}
 			
@@ -1270,7 +1270,7 @@ const saveLocalSongsToCache = (songs) => {
 	try {
 		uni.setStorageSync(LOCAL_SONGS_CACHE_KEY, songs);
 		uni.setStorageSync(SCAN_TIME_CACHE_KEY, Date.now());
-		console.log(`已保存 ${songs.length} 首本地歌曲到缓存`);
+		// console.log(`已保存 ${songs.length} 首本地歌曲到缓存`);
 	} catch (e) {
 		console.error('保存本地歌曲缓存失败:', e);
 	}
@@ -1283,7 +1283,7 @@ const clearLocalSongsCache = () => {
 	try {
 		uni.removeStorageSync(LOCAL_SONGS_CACHE_KEY);
 		uni.removeStorageSync(SCAN_TIME_CACHE_KEY);
-		console.log('已清除本地歌曲缓存');
+		// console.log('已清除本地歌曲缓存');
 	} catch (e) {
 		console.error('清除缓存失败:', e);
 	}
@@ -1302,7 +1302,7 @@ const scanAndMatchLocalSongs = async (options = {}) => {
 	// #ifdef APP-PLUS
 	// 检查是否需要扫描
 	if (!forceScan && isCacheValid()) {
-		console.log('使用缓存的本地歌曲');
+		// console.log('使用缓存的本地歌曲');
 		const cachedSongs = getAllLocalSongs();
 		if (cachedSongs.length > 0) {
 			return cachedSongs;
@@ -1311,7 +1311,7 @@ const scanAndMatchLocalSongs = async (options = {}) => {
 	
 	// 如果正在扫描中，返回当前结果
 	if (isScanning) {
-		console.log('已在扫描中');
+		// console.log('已在扫描中');
 		return getAllLocalSongs();
 	}
 	
@@ -1325,7 +1325,7 @@ const scanAndMatchLocalSongs = async (options = {}) => {
 		}
 		
 		const rawMusicFiles = await scanSystemMusicFiles();
-		console.log(`扫描到 ${rawMusicFiles.length} 首本地音乐文件`);
+		// console.log(`扫描到 ${rawMusicFiles.length} 首本地音乐文件`);
 		
 		if (rawMusicFiles.length === 0) {
 			// 没有找到音乐文件，清空缓存
@@ -1367,7 +1367,7 @@ const scanAndMatchLocalSongs = async (options = {}) => {
 			onProgress({ stage: 'complete', message: '扫描完成', progress: 100 });
 		}
 		
-		console.log(`扫描并匹配完成，共 ${matchedSongs.length} 首歌曲`);
+		// console.log(`扫描并匹配完成，共 ${matchedSongs.length} 首歌曲`);
 		return matchedSongs;
 		
 	} catch (error) {

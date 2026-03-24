@@ -221,9 +221,9 @@ const handleLogout = () => {
 			content: '确定要退出登录吗？',
 			success: async (res) => {
 				if (res.confirm) {
-					console.log('[Sidebar] 用户确认退出登录')
+					// console.log('[Sidebar] 用户确认退出登录')
 					await userStore.logout()
-					console.log('[Sidebar] 退出登录完成')
+					// console.log('[Sidebar] 退出登录完成')
 					uni.showToast({
 						title: '已退出登录',
 						icon: 'success'

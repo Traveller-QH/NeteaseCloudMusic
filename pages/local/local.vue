@@ -1,8 +1,7 @@
 <template>
-  <!-- 状态栏占位块 -->
-  <view class="status_bar" />
-
   <view class="local-page">
+    <!-- 状态栏占位块 -->
+    <view class="status_bar" />
 
     <!-- 自定义顶部导航栏 -->
     <view class="custom-navbar">
@@ -155,7 +154,7 @@ const deleteSong = (song) => {
 
 // 刷新（手动触发重新扫描）
 const refreshLocalSongs = async () => {
-  console.log('点击刷新按钮');
+  // console.log('点击刷新按钮');
   
   // 如果正在扫描中，提示用户
   const scanState = musicStore.getScanState();
@@ -172,7 +171,7 @@ const refreshLocalSongs = async () => {
     await musicStore.scanAndMatchLocalSongs({
       forceScan: true,
       onProgress: (progressInfo) => {
-        console.log('扫描进度:', progressInfo);
+        // console.log('扫描进度:', progressInfo);
         // 扫描完成时隐藏 loading
         if (progressInfo.stage === 'complete') {
           uni.hideLoading();
@@ -201,7 +200,7 @@ const handleBack = () => {
 
 // tab切换（占位）
 const onTabChange = (name) => {
-  console.log('Tab changed to:', name)
+  // console.log('Tab changed to:', name)
 }
 
 onMounted(() => {
@@ -229,23 +228,22 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24rpx;
+  padding: 0 15px;
   background: #fff;
   border-bottom: 1rpx solid #f0f0f0;
   position: relative;
-  z-index: 100;
 
   .nav-left, .nav-right {
-    width: 60rpx;
-    height: 60rpx;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-  }
 
-  .nav-icon {
-    font-size: 40rpx;
-    color: #333;
+    .nav-icon {
+      font-size: 40rpx;
+      color: #333;
+    }
   }
 
   .nav-title {
@@ -267,6 +265,7 @@ onMounted(() => {
 
 .content-scroll {
   flex: 1;
+  overflow-y: scroll;
   height: 100%;
 }
 
