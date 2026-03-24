@@ -224,7 +224,8 @@ const refreshLocalSongs = async () => {
           // 强制刷新页面：增加计数器，触发 computed 重新计算
           refreshCounter.value++;
           uni.showToast({ 
-            title: `扫描完成，共${musicStore.getAllLocalSongs().length}首歌曲`, 
+            // title: `扫描完成，共${musicStore.getAllLocalSongs().length}首歌曲`,
+            title: '扫描完成',
             icon: 'success',
             duration: 2000
           });
