@@ -60,8 +60,8 @@
           </view>
 
           <view class="song-info">
-            <text class="song-name">{{ song.name }}</text>
-            <text class="song-artist">{{ getArtistNames(song.artists) }}</text>
+            <text class="song-name">{{ getSongName(song) }}</text>
+            <text class="song-artist">{{ getArtistNames(song) }}</text>
           </view>
 
           <view class="song-actions">
@@ -84,6 +84,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useMusicStore } from '@/utils/musicStore.js'
+import { parseFileName } from '@/utils/localMusicScanner.js'
 import AppTabBar from '@/components/AppTabBar/AppTabBar.vue'
 import PlayBar from '@/components/PlayBar/PlayBar.vue'
 
@@ -115,10 +116,48 @@ const totalSizeStr = computed(() => {
   }
 })
 
-// 获取歌手名称
-const getArtistNames = (artists) => {
-  if (!artists || !artists.length) return '未知歌手'
-  return artists.map(a => a.name).join(' / ')
+// 获取歌手名称（优先使用匹配后的信息，失败则从文件名解析）
+const getArtistNames = (song) => {
+  // 如果匹配成功，使用匹配的歌手名
+  if (song.matchSuccess && song.artists && song.artists.length > 0) {
+    return song.artists.map(a => a.name).join(' / ')
+  }
+  
+  // 匹配失败或未匹配，尝试从文件名解析
+  if (song.localPath) {
+    const fileName = song.localPath.split('/').pop()
+    const parsed = parseFileName(fileName)
+    
+    // 如果文件名能解析出歌手名，返回解析结果
+    if (parsed.artist) {
+      return parsed.artist
+    }
+  }
+  
+  // 无法解析，返回默认值
+  return '未知歌手'
+}
+
+// 获取歌曲名称（优先使用匹配后的信息，失败则从文件名解析）
+const getSongName = (song) => {
+  // 如果匹配成功，使用匹配的歌名
+  if (song.matchSuccess && song.name) {
+    return song.name
+  }
+  
+  // 匹配失败或未匹配，尝试从文件名解析
+  if (song.localPath) {
+    const fileName = song.localPath.split('/').pop()
+    const parsed = parseFileName(fileName)
+    
+    // 返回解析的歌名（如果有）
+    if (parsed.title) {
+      return parsed.title
+    }
+  }
+  
+  // 无法解析，返回默认值
+  return song.name || '未知歌曲'
 }
 
 // 播放歌曲
