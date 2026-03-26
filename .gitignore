@@ -12,3 +12,5 @@
 /unpackage/
 # 编辑器启动配置文件
 /.hbuilderx/launch.json
+# 依赖目录（npm）
+node_modules/
