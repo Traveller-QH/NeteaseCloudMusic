@@ -96,7 +96,7 @@
           <view class="wiki-content">
             <text class="wiki-artist-name">{{ artistInfo.artist?.name }}</text>
             <text class="wiki-gender-zodiac">
-              {{ artistInfo.user.gender === 1 ? '男' : '女' }}
+              {{ artistInfo?.user?.gender === 1 ? '男' : (artistInfo?.user?.gender === 2 ? '女' : '') }}
               {{
                 getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
                     ? '/' + getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
@@ -334,15 +334,11 @@
                 <text class="info-label">地区：</text>
                 <text class="info-value">{{ getIpLocation(artistInfo.user) }}</text>
               </view>
-              <view class="info-row" v-if="artistWiki?.desc">
+              <view class="info-row" v-if="extractBirthdayFromDesc(artistWiki.desc || '')">
                 <text class="info-label">生日：</text>
                 <text class="info-value">
-                  {{ extractBirthdayFromDesc(artistWiki.desc) }}
-                  {{
-                    getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
-                        ? getZodiacSign(extractBirthdayFromDesc(artistWiki.desc))
-                        : ''
-                  }}
+                  {{ extractBirthdayFromDesc(artistWiki?.desc || '') }}
+                  {{ getZodiacSign(extractBirthdayFromDesc(artistWiki?.desc || '')) || '' }}
                 </text>
               </view>
               <view class="info-row" v-if="artistWiki?.nation">
