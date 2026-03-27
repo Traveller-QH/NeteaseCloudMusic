@@ -63,12 +63,16 @@ const hasTranslation = computed(() => {
 // 根据是否有翻译动态设置行高
 const lineHeightValue = computed(() => {
 	// 有翻译：200rpx（容纳最多 4 行）
-	// 无翻译：100rpx（通常 1-2 行就够了）
-	return hasTranslation.value ? 200 : 100
+	// 无翻译：120rpx（适当宽松，容纳 1-2 行）
+	return hasTranslation.value ? 200 : 120
 })
 
 // 滚动位置
 const scrollTop = ref(0)
+// 是否禁用自动滚动（用户正在触摸或刚触摸完）
+const disableAutoScroll = ref(false)
+// 触摸定时器
+let touchTimer = null
 
 // 触摸相关
 let lastTouchTime = 0
@@ -106,7 +110,7 @@ const updateScrollPosition = () => {
 watch(
 	() => currentIndex.value,
 	(newIndex) => {
-		if (props.visible) {
+		if (props.visible && !disableAutoScroll.value) {
 			updateScrollPosition()
 		}
 	},
@@ -129,6 +133,12 @@ watch(
 const handleTouchStart = (e) => {
 	lastTouchTime = Date.now()
 	lastTouchY = e.touches[0].clientY
+	// 禁用自动滚动
+	disableAutoScroll.value = true
+	// 清除之前的定时器
+	if (touchTimer) {
+		clearTimeout(touchTimer)
+	}
 }
 
 // 触摸移动
@@ -145,6 +155,13 @@ const handleTouchEnd = (e) => {
 	// 如果是快速点击（不是滑动），关闭大屏歌词
 	if (Math.abs(deltaY) < 10 && touchDuration < 300) {
 		emit('close')
+	} else {
+		// 如果是滑动，2 秒后恢复自动滚动
+		touchTimer = setTimeout(() => {
+			disableAutoScroll.value = false
+			// 恢复后立即更新到当前高亮行位置
+			updateScrollPosition()
+		}, 2000)
 	}
 }
 
@@ -158,7 +175,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-	// 清理
+	// 清理定时器
+	if (touchTimer) {
+		clearTimeout(touchTimer)
+	}
 })
 </script>
 
@@ -183,7 +203,7 @@ onUnmounted(() => {
 		}
 		
 		.lyric-line {
-			min-height: 100rpx; // 默认最小高度（会被内联样式覆盖）
+			min-height: 120rpx; // 默认最小高度（会被内联样式覆盖）
 			padding: 20rpx 60rpx;
 			text-align: center;
 			transition: all 0.3s ease;

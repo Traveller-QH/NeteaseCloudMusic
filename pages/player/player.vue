@@ -61,6 +61,9 @@
 				class="lyric-scroll"
 				:scroll-top="lyricScrollTop"
 				:scroll-with-animation="true"
+				@touchstart="handleLyricTouchStart"
+				@touchmove="handleLyricTouchMove"
+				@touchend="handleLyricTouchEnd"
 			>
 				<!-- 顶部占位 -->
 				<view class="lyric-placeholder"></view>
@@ -364,6 +367,10 @@ watch(
 // 页面卸载时清理
 onUnmounted(() => {
 	stopRotating()
+	// 清理歌词触摸定时器
+	if (lyricTouchTimer) {
+		clearTimeout(lyricTouchTimer)
+	}
 })
 
 // 弹窗显示状态
@@ -449,8 +456,12 @@ watch(
 
 // 歌词滚动位置
 const lyricScrollTop = ref(0)
+// 是否禁用自动滚动（用户正在触摸或刚触摸完）
+const disableLyricAutoScroll = ref(false)
+// 触摸定时器
+let lyricTouchTimer = null
 
-// rpx转px的比例（基于750设计稿）
+// rpx 转 px 的比例（基于 750 设计稿）
 const getRpxToPx = () => {
 	const screenWidth = uni.getSystemInfoSync().windowWidth
 	return screenWidth / 750
@@ -460,18 +471,20 @@ const getRpxToPx = () => {
 watch(
 	() => musicStore.state.currentLyricIndex,
 	(newIndex) => {
-		const ratio = getRpxToPx()
-		const lineHeight = 100 * ratio // 每行歌词高度 100rpx（稍微增大以适配可能的 2 行歌词）
-		const placeholderHeight = 100 * ratio // 顶部占位 100rpx
-		const wrapperHeight = 280 * ratio // 歌词区域高度 280rpx
+		if (!disableLyricAutoScroll.value) {
+			const ratio = getRpxToPx()
+			const lineHeight = 100 * ratio // 每行歌词高度 100rpx（稍微增大以适配可能的 2 行歌词）
+			const placeholderHeight = 100 * ratio // 顶部占位 100rpx
+			const wrapperHeight = 280 * ratio // 歌词区域高度 280rpx
 
-		// 计算滚动位置，让当前歌词居中显示
-		// 当前歌词的位置 = 占位高度 + 索引 * 行高
-		// 要居中显示，需要滚动到：当前位置 - (容器高度/2) + (行高/2)
-		const currentPosition = placeholderHeight + newIndex * lineHeight
-		const scrollPosition = currentPosition - (wrapperHeight / 2) + (lineHeight / 2)
+			// 计算滚动位置，让当前歌词居中显示
+			// 当前歌词的位置 = 占位高度 + 索引 * 行高
+			// 要居中显示，需要滚动到：当前位置 - (容器高度/2) + (行高/2)
+			const currentPosition = placeholderHeight + newIndex * lineHeight
+			const scrollPosition = currentPosition - (wrapperHeight / 2) + (lineHeight / 2)
 
-		lyricScrollTop.value = Math.max(0, scrollPosition)
+			lyricScrollTop.value = Math.max(0, scrollPosition)
+		}
 	},
 	{ immediate: true }
 )
@@ -487,6 +500,51 @@ const isFullscreenLyric = ref(false)
 // 切换全屏歌词
 const toggleFullscreenLyric = () => {
 	isFullscreenLyric.value = !isFullscreenLyric.value
+}
+
+// 普通歌词区域触摸相关
+let lyricLastTouchTime = 0
+let lyricLastTouchY = 0
+
+// 触摸开始
+const handleLyricTouchStart = (e) => {
+	lyricLastTouchTime = Date.now()
+	lyricLastTouchY = e.touches[0].clientY
+	// 禁用自动滚动
+	disableLyricAutoScroll.value = true
+	// 清除之前的定时器
+	if (lyricTouchTimer) {
+		clearTimeout(lyricTouchTimer)
+	}
+}
+
+// 触摸移动
+const handleLyricTouchMove = (e) => {
+	// 阻止默认行为
+}
+
+// 触摸结束
+const handleLyricTouchEnd = (e) => {
+	const touchDuration = Date.now() - lyricLastTouchTime
+	const touchY = e.changedTouches[0].clientY
+	const deltaY = touchY - lyricLastTouchY
+	
+	// 如果是滑动，2 秒后恢复自动滚动
+	lyricTouchTimer = setTimeout(() => {
+		disableLyricAutoScroll.value = false
+		// 恢复后立即更新到当前高亮行位置
+		const ratio = getRpxToPx()
+		const lineHeight = 100 * ratio
+		const placeholderHeight = 100 * ratio
+		const wrapperHeight = 280 * ratio
+		const currentIndex = musicStore.state.currentLyricIndex
+		
+		if (currentIndex >= 0) {
+			const currentPosition = placeholderHeight + currentIndex * lineHeight
+			const scrollPosition = currentPosition - (wrapperHeight / 2) + (lineHeight / 2)
+			lyricScrollTop.value = Math.max(0, scrollPosition)
+		}
+	}, 2000)
 }
 
 // 显示的进度（拖动时显示拖动进度，否则显示实际进度）
