@@ -862,11 +862,23 @@ const setPlaylist = (songs, currentSongId = null, preserveCurrentPlay = false) =
 		resumePlaying = state.isPlaying
 	}
 	
-	state.playlist = songs
+	// 关键修复：对歌曲列表进行去重（根据 id）
+	const uniqueSongs = []
+	const seenIds = new Set()
+	for (const song of songs) {
+		const songId = String(song.id)
+		if (!seenIds.has(songId)) {
+			seenIds.add(songId)
+			uniqueSongs.push(song)
+		}
+	}
+	
+	// 使用去重后的列表
+	state.playlist = uniqueSongs
 	
 	// 如果指定了当前歌曲，设置播放索引
 	if (currentSongId) {
-		const index = songs.findIndex(s => String(s.id) === String(currentSongId))
+		const index = state.playlist.findIndex(s => String(s.id) === String(currentSongId))
 		if (index !== -1) {
 			state.playlistIndex = index
 		} else {
@@ -963,8 +975,9 @@ const playNextInQueue = (song) => {
 	const insertIndex = state.playlistIndex + 1
 	state.playlist.splice(insertIndex, 0, song)
 	
-	// 更新当前歌曲信息（但不播放）
-	state.currentSong = song
+	// 关键修复：不要更新 state.currentSong！
+	// 因为此时正在播放其他歌曲，更新 currentSong 会导致 UI 显示错误
+	// currentSong 只在真正开始播放时才更新
 	
 	return true
 }
