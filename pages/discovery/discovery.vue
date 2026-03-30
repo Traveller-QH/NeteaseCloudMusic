@@ -226,6 +226,11 @@ onBackPress(() => {
     showSearchPopup.value = false
     return true // 阻止默认返回行为
   }
+  if (showMoreMenu.value) {
+    // 如果更多菜单弹窗显示，关闭弹窗并阻止默认返回
+    showMoreMenu.value = false
+    return true // 阻止默认返回行为
+  }
   // 返回 false 允许默认返回行为（退出应用）
   return false
 })

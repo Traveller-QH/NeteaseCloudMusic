@@ -72,7 +72,7 @@
           <text class="song-name">{{ song.name }}</text>
           <text class="song-artist">{{ getArtistNames(song) }}</text>
         </view>
-        <view class="song-action">
+        <view class="song-action" @click.stop="openMoreMenu(song)">
           <i class="iconfont icon-sandiancaidan action-icon"/>
         </view>
       </view>
@@ -141,15 +141,24 @@
       </view>
     </view>
   </view>
+  
+  <!-- 更多选项弹窗（移到外层，使用固定定位） -->
+  <SongMoreMenu v-model="showMoreMenu" :song="currentSongForMenu" @play-next="handlePlayNext" />
 </template>
 
 <script setup>
 import {ref, onMounted} from 'vue'
+import {onBackPress} from '@dcloudio/uni-app'
 import {getAlbum, getAlbumSongs, getAlbumDetailDynamic, toggleAlbumSub} from '@/utils/api.js'
 import {useMusicStore} from '@/utils/musicStore.js'
 import PlayBar from '@/components/PlayBar/PlayBar.vue'
+import SongMoreMenu from '@/components/SongMoreMenu/SongMoreMenu.vue'
 
 const musicStore = useMusicStore()
+
+// 更多菜单相关
+const showMoreMenu = ref(false) // 控制更多选项弹窗显示
+const currentSongForMenu = ref(null) // 当前弹窗对应的歌曲
 
 // 专辑 ID
 const albumId = ref('')
@@ -388,6 +397,31 @@ const handlePlayAll = () => {
     handlePlaySong(songList.value[0])
   }
 }
+
+// 打开更多菜单
+const openMoreMenu = (song) => {
+  currentSongForMenu.value = song
+  showMoreMenu.value = true
+}
+
+// 下一首播放处理
+const handlePlayNext = (song) => {
+  if (!song) return
+  
+  // 调用 musicStore 的 playNextInQueue 方法
+  musicStore.playNextInQueue(song)
+}
+
+// 处理返回键（使用 uni-app 的 onBackPress）
+onBackPress(() => {
+  if (showMoreMenu.value) {
+    // 如果更多菜单弹窗显示，关闭弹窗并阻止默认返回
+    showMoreMenu.value = false
+    return true // 阻止默认返回行为
+  }
+  // 返回 false 允许默认返回行为
+  return false
+})
 
 // 收藏/取消收藏
 const toggleFavorite = async () => {
@@ -862,5 +896,11 @@ onMounted(async () => {
       }
     }
   }
+}
+
+// 更多选项弹窗（固定定位，不影响布局）
+:deep(.u-popup) {
+  position: fixed !important;
+  z-index: 10000 !important; // 确保在最上层，高于底部播放器 (play-bar 最高 1000)
 }
 </style>

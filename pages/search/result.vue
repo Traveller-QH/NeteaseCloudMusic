@@ -81,7 +81,7 @@
                 <text class="song-name">{{ song.name }}</text>
                 <text class="song-artist">{{ formatSongArtists(song) }} - {{ getSongAlbumName(song) }}</text>
               </view>
-              <view class="song-actions">
+              <view class="song-actions" @click.stop="openMoreMenu(song)">
                 <i class="iconfont icon-sandiancaidan play-icon" />
               </view>
             </view>
@@ -417,7 +417,7 @@
                 <text class="song-name">{{ song.name }}</text>
                 <text class="song-artist">{{ formatSongArtists(song) }} - {{ getSongAlbumName(song) }}</text>
               </view>
-              <view class="song-actions">
+              <view class="song-actions" @click.stop="openMoreMenu(song)">
                 <i class="iconfont icon-sandiancaidan play-icon" />
               </view>
             </view>
@@ -628,21 +628,27 @@
     <!-- 搜索弹窗组件 -->
     <SearchPopup v-model="showSearchPopup" @search="handleSearchFromPopup" />
   </view>
+  
+  <!-- 更多选项弹窗（移到外层，使用固定定位） -->
+  <SongMoreMenu v-model="showMoreMenu" :song="currentSongForMenu" @play-next="handlePlayNext" />
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { onLoad, onShow } from '@dcloudio/uni-app'
+import { onLoad, onShow, onBackPress } from '@dcloudio/uni-app'
 import { search, getSearchDefault } from '@/utils/api.js'
 import { useMusicStore } from '@/utils/musicStore.js'
 import PlayBar from '@/components/PlayBar/PlayBar.vue'
 import SearchPopup from '@/components/SearchPopup/SearchPopup.vue'
+import SongMoreMenu from '@/components/SongMoreMenu/SongMoreMenu.vue'
 
 const musicStore = useMusicStore()
 
 // 获取页面参数
 const currentKeyword = ref('')
 const showSearchPopup = ref(false) // 控制搜索弹窗显示
+const showMoreMenu = ref(false) // 控制更多选项弹窗显示
+const currentSongForMenu = ref(null) // 当前弹窗对应的歌曲
 
 // 使用onLoad生命周期获取参数
 onLoad((options) => {
@@ -653,6 +659,22 @@ onLoad((options) => {
 // 定义页面的其他生命周期
 onShow(() => {
   // 页面显示时的逻辑
+})
+
+// 处理返回键（使用 uni-app 的 onBackPress）
+onBackPress(() => {
+  if (showSearchPopup.value) {
+    // 如果搜索弹窗显示，关闭弹窗并阻止默认返回
+    showSearchPopup.value = false
+    return true // 阻止默认返回行为
+  }
+  if (showMoreMenu.value) {
+    // 如果更多菜单弹窗显示，关闭弹窗并阻止默认返回
+    showMoreMenu.value = false
+    return true // 阻止默认返回行为
+  }
+  // 返回 false 允许默认返回行为
+  return false
 })
 
 // 数据
@@ -1160,6 +1182,20 @@ const goToSearchPage = () => {
 const goBack = () => {
   // 返回时清空关键词
   uni.navigateBack()
+}
+
+// 打开更多菜单
+const openMoreMenu = (song) => {
+  currentSongForMenu.value = song
+  showMoreMenu.value = true
+}
+
+// 下一首播放处理
+const handlePlayNext = (song) => {
+  if (!song) return
+  
+  // 调用 musicStore 的 playNextInQueue 方法
+  musicStore.playNextInQueue(song)
 }
 
 // 加载更多
@@ -1824,5 +1860,11 @@ onMounted(() => {
   right: 0;
   z-index: 1000;
   box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+// 更多选项弹窗（固定定位，不影响布局）
+:deep(.u-popup) {
+  position: fixed !important;
+  z-index: 10000 !important; // 确保在最上层，高于底部播放器 (play-bar 最高 1000)
 }
 </style>

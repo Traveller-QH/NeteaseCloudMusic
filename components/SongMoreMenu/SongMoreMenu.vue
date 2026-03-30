@@ -2,13 +2,16 @@
   <up-popup v-model:show="visible" mode="bottom" :round="20" :z-index="10000">
     <view class="song-more-menu">
       <!-- 歌曲信息头部 -->
-      <view class="menu-header">
+      <view class="menu-header" v-if="songData">
         <image v-if="getSongCover(songData)" class="menu-cover" :src="getSongCover(songData)" mode="aspectFill"></image>
         <i v-else class="iconfont icon-yinle menu-cover-icon" />
         <view class="menu-info">
-          <text class="menu-song-name">{{ songData?.name || songData?.song?.name || '未知歌曲' }}</text>
+          <text class="menu-song-name">{{ songData?.name || '未知歌曲' }}</text>
           <text class="menu-artist-name">{{ getArtistNames(songData) || '未知歌手' }}</text>
         </view>
+      </view>
+      <view class="menu-header" v-else-if="isLoading">
+        <view class="loading-tip">加载中...</view>
       </view>
 
       <!-- 分割线 -->
@@ -55,6 +58,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useMusicStore } from '@/utils/musicStore.js'
+import { getSongDetail } from '@/utils/api.js'
 
 const props = defineProps({
   modelValue: {
@@ -78,12 +82,40 @@ const visible = computed({
 })
 
 // 当前歌曲数据
-const songData = ref(props.song)
+const songData = ref(null)
 
-// 监听 song prop 变化
-watch(() => props.song, (newVal) => {
-  songData.value = newVal
+// 加载状态
+const isLoading = ref(false)
+
+// 监听弹窗显示状态，显示时获取歌曲详情
+watch(() => props.modelValue, async (newVal) => {
+  if (newVal && props.song?.id) {
+    await fetchSongDetail(props.song)
+  }
 }, { immediate: true })
+
+// 获取歌曲详情
+const fetchSongDetail = async (song) => {
+  if (!song?.id) return
+  
+  isLoading.value = true
+  try {
+    const res = await getSongDetail(song.id)
+    if (res.code === 200 && res.songs && res.songs.length > 0) {
+      // 使用完整的歌曲详情数据更新 songData
+      songData.value = res.songs[0]
+    } else {
+      // 如果接口失败，使用原始数据
+      songData.value = song
+    }
+  } catch (error) {
+    console.error('获取歌曲详情失败:', error)
+    // 出错时使用原始数据
+    songData.value = song
+  } finally {
+    isLoading.value = false
+  }
+}
 
 // 获取歌手名称
 const getArtistNames = (song) => {
@@ -352,6 +384,14 @@ const navigateToArtist = async () => {
     display: flex;
     align-items: center;
     padding: 40rpx 30rpx 30rpx;
+
+    .loading-tip {
+      width: 100%;
+      text-align: center;
+      font-size: 26rpx;
+      color: #999;
+      padding: 40rpx 0;
+    }
 
     .menu-cover {
       width: 120rpx;
