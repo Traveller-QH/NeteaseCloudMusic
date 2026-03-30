@@ -73,7 +73,7 @@
           <text class="song-artist">{{ getArtistNames(song) }}</text>
         </view>
         <view class="song-action">
-          <i class="iconfont icon-gengduo action-icon"/>
+          <i class="iconfont icon-sandiancaidan action-icon"/>
         </view>
       </view>
 
