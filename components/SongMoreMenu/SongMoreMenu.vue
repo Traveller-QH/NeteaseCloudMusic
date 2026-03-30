@@ -20,7 +20,7 @@
       <!-- 功能选项 -->
       <view class="menu-options">
         <view class="menu-option" @click="handlePlayNext">
-          <i class="iconfont menu-icon icon-bofang1" />
+          <i class="iconfont menu-icon icon-xiayishoubofang" />
           <text class="menu-text">下一首播放</text>
         </view>
         <view class="menu-option" @click="handleToggleLike">
