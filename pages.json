@@ -50,13 +50,6 @@
       }
     },
     {
-      "path": "pages/search/result",
-      "style": {
-        "navigationStyle": "custom",
-        "navigationBarTitleText": "搜索结果"
-      }
-    },
-    {
       "path": "pages/login/login",
       "style": {
         "navigationStyle": "custom",

@@ -396,7 +396,7 @@ const handleSearchClick = () => {
 // 处理搜索事件 - 跳转到搜索结果页
 const handleSearch = (keyword) => {
   uni.navigateTo({
-    url: `/pages/search/result?keyword=${encodeURIComponent(keyword)}`
+    url: `/pages/search/search?keyword=${encodeURIComponent(keyword)}`
   })
 }
 
