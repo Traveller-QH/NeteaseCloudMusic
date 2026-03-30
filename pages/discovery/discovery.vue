@@ -775,6 +775,9 @@ const initData = async () => {
         display: block;
         font-size: 26rpx;
         color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .card-artist {
@@ -782,6 +785,9 @@ const initData = async () => {
         font-size: 22rpx;
         color: #999;
         margin-top: 6rpx;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }
