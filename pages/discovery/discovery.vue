@@ -116,7 +116,7 @@
               <text class="song-name">{{ item.name }}</text>
               <text class="song-artist">{{ getArtistNames(item.song?.artists || item.artists) }}</text>
             </view>
-            <view class="song-action">
+            <view class="song-action" @click.stop="openMoreMenu(item)">
               <i class="iconfont icon-sandiancaidan song-play-icon" />
             </view>
           </view>
@@ -152,6 +152,9 @@
             <view class="card-info">
               <text class="card-title">{{ item.name }}</text>
               <text class="card-artist">{{ getArtistNames(item.artists) }}</text>
+            </view>
+            <view class="card-more-action" @click.stop="openMoreMenu(item)">
+              <i class="iconfont icon-sandiancaidan card-more-icon" />
             </view>
           </view>
         </scroll-view>
@@ -191,6 +194,9 @@
     <!-- 搜索弹窗组件 -->
     <SearchPopup v-model="showSearchPopup" @search="handleSearch" />
   </view>
+  
+  <!-- 更多选项弹窗（移到外层，使用固定定位） -->
+  <SongMoreMenu v-model="showMoreMenu" :song="currentSongForMenu" @play-next="handlePlayNext" />
 </template>
 
 <script setup>
@@ -202,6 +208,7 @@ import AppTabBar from '@/components/AppTabBar/AppTabBar.vue'
 import Sidebar from '@/components/Sidebar/Sidebar.vue'
 import PlayBar from '@/components/PlayBar/PlayBar.vue'
 import SearchPopup from '@/components/SearchPopup/SearchPopup.vue'
+import SongMoreMenu from '@/components/SongMoreMenu/SongMoreMenu.vue'
 
 const musicStore = useMusicStore()
 
@@ -209,6 +216,8 @@ const activeTab = ref(0)
 const showSidebar = ref(false)
 const loading = ref(false)
 const showSearchPopup = ref(false) // 控制搜索弹窗显示
+const showMoreMenu = ref(false) // 控制更多选项弹窗显示
+const currentSongForMenu = ref(null) // 当前弹窗对应的歌曲
 
 // 处理返回键（使用 uni-app 的 onBackPress）
 onBackPress(() => {
@@ -363,6 +372,20 @@ const playSong = (song) => {
       url: `/pages/player/player?id=${song.id}`
     })
   }
+}
+
+// 打开更多菜单
+const openMoreMenu = (song) => {
+  currentSongForMenu.value = song
+  showMoreMenu.value = true
+}
+
+// 下一首播放处理
+const handlePlayNext = (song) => {
+  if (!song) return
+  
+  // 调用 musicStore 的 playNextInQueue 方法
+  musicStore.playNextInQueue(song)
 }
 
 // 获取轮播图数据
@@ -532,6 +555,12 @@ const initData = async () => {
 }
 
 /* 以下样式全部保持原样，无需任何修改 */
+// 更多选项弹窗（固定定位，不影响布局）
+:deep(.u-popup) {
+  position: fixed !important;
+  z-index: 10000 !important; // 确保在最上层，高于底部播放器 (play-bar 最高 1000)
+}
+
 .quick-entry {
   display: flex;
   justify-content: space-between;
@@ -742,6 +771,7 @@ const initData = async () => {
     display: inline-block;
     width: 240rpx;
     margin-right: 20rpx;
+    position: relative;
 
     .card-cover {
       width: 240rpx;
@@ -788,6 +818,25 @@ const initData = async () => {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+    }
+
+    .card-more-action {
+      position: absolute;
+      top: 10rpx;
+      right: 10rpx;
+      width: 50rpx;
+      height: 50rpx;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+
+      .card-more-icon {
+        font-size: 28rpx;
+        color: #fff;
       }
     }
   }

@@ -931,6 +931,44 @@ const addToPlaylist = (song) => {
 	return true
 }
 
+// 添加到下一首播放（不立即播放，只插入到播放列表）
+const playNextInQueue = (song) => {
+	if (!song || !song.id) {
+		console.warn('歌曲信息无效')
+		return false
+	}
+	
+	// 检查是否已在播放列表中
+	const existingIndex = state.playlist.findIndex(s => String(s.id) === String(song.id))
+	
+	// 如果没有正在播放的歌曲，添加到播放列表并设置索引为 0
+	if (state.playlist.length === 0 || state.playlistIndex < 0) {
+		state.playlist.push(song)
+		state.playlistIndex = 0
+		state.currentSong = song
+		playSongById(song.id)
+		return true
+	}
+	
+	// 如果已存在，从原位置移除
+	if (existingIndex !== -1) {
+		state.playlist.splice(existingIndex, 1)
+		// 如果移除的是当前播放位置之前的歌曲，需要调整索引
+		if (existingIndex < state.playlistIndex) {
+			state.playlistIndex--
+		}
+	}
+	
+	// 在当前播放位置的下一首插入
+	const insertIndex = state.playlistIndex + 1
+	state.playlist.splice(insertIndex, 0, song)
+	
+	// 更新当前歌曲信息（但不播放）
+	state.currentSong = song
+	
+	return true
+}
+
 // 从播放列表中移除歌曲
 const removeFromPlaylist = (songId) => {
 	if (!songId) return false
@@ -1527,6 +1565,7 @@ export const useMusicStore = () => {
 		playNext,
 		playPrevious,
 		togglePlayMode,
+		playNextInQueue, // 添加到下一首播放
 		getPreloadData,
 		setPreloadData,
 		resetPreloadData,
